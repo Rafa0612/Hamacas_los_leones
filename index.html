@@ -23,7 +23,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;height:100vh;display:f
 .datebar button{background:#0077b6;color:white;border:none;border-radius:50%;width:32px;height:32px;font-size:1.1rem;cursor:pointer;flex-shrink:0;}
 .datebar span{font-weight:700;font-size:0.85rem;color:#333;min-width:148px;text-align:center;}
 .today-btn{background:#00b4d8!important;border-radius:8px!important;width:auto!important;padding:0 10px!important;font-size:0.72rem!important;height:32px!important;}
-.summary{background:#023e8a;color:white;display:flex;justify-content:space-around;padding:8px 4px;font-size:0.68rem;flex-shrink:0;z-index:90;box-shadow:0 1px 4px rgba(0,0,0,0.15);}
+.summary{background:#023e8a;color:white;display:flex;justify-content:space-around;padding:8px 4px;font-size:0.68rem;flex-shrink:0;z-index:90;}
 .summary div{text-align:center;}
 .summary span{display:block;font-size:0.88rem;font-weight:700;}
 .total-tap{cursor:pointer;}
@@ -58,10 +58,12 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;height:100vh;display:f
 .group-bar-btns{display:flex;gap:8px;}
 .group-bar-btns button{padding:8px 14px;border:none;border-radius:6px;font-size:0.75rem;font-weight:700;cursor:pointer;}
 .gb-cancel{background:rgba(0,0,0,0.12);color:#333;}.gb-confirm{background:#023e8a;color:white;}
-.dropdown-menu{display:none;position:fixed;top:52px;right:12px;background:white;border-radius:12px;box-shadow:0 4px 22px rgba(0,0,0,0.3);z-index:200;width:180px;overflow:hidden;}
+.dropdown-menu{display:none;position:fixed;top:52px;right:12px;background:white;border-radius:12px;box-shadow:0 4px 22px rgba(0,0,0,0.3);z-index:200;width:200px;overflow:hidden;}
 .dropdown-menu.open{display:block;}
-.dropdown-menu button{width:100%;padding:12px 16px;background:none;border:none;text-align:left;font-size:0.88rem;color:#333;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee;}
+.dropdown-menu button{width:100%;padding:12px 16px;background:none;border:none;text-align:left;font-size:0.85rem;color:#333;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee;}
 .dropdown-menu button:last-child{border-bottom:none;}
+.dropdown-menu button:active{background:#f0f4f8;}
+.dropdown-section{padding:6px 16px 3px;font-size:0.65rem;color:#999;font-weight:700;letter-spacing:0.05em;border-top:2px solid #eee;border-bottom:1px solid #eee;background:#f8f9fa;}
 .menu-overlay-close{display:none;position:fixed;inset:0;z-index:190;}
 .menu-overlay-close.open{display:block;}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:220;align-items:flex-end;justify-content:center;}
@@ -114,8 +116,8 @@ label{font-size:0.76rem;color:#555;display:block;margin-bottom:2px;margin-top:5p
 .compare{margin-top:7px;font-size:0.82rem;font-weight:600;}
 .compare.pos{color:#198754;}.compare.neg{color:#dc3545;}
 .export-btn{width:100%;padding:13px;background:#0077b6;color:white;border:none;border-radius:11px;font-size:0.92rem;font-weight:700;cursor:pointer;}
-
-/* MODAL MÉTODO DE PAGO */
+/* MODAL PAGO */
+#payMethodBg{z-index:320;}
 .pay-modal{background:white;border-radius:20px 20px 0 0;padding:20px 16px;width:100%;max-width:500px;}
 .pay-modal h3{font-size:1rem;color:#023e8a;font-weight:700;margin-bottom:6px;text-align:center;}
 .pay-modal p{font-size:0.78rem;color:#888;text-align:center;margin-bottom:16px;}
@@ -140,6 +142,11 @@ label{font-size:0.76rem;color:#555;display:block;margin-bottom:2px;margin-top:5p
   <button onclick="showScreen('mapa')">🗺️ Ver Mapa</button>
   <button onclick="showScreen('resumen')">📊 Ver Resumen</button>
   <button onclick="toggleLegend(true)">🎨 Ver Leyenda</button>
+  <div class="dropdown-section">⚙️ PANEL DE CONTROL</div>
+  <button onclick="vaciarDia()">🗑️ Vaciar Día Actual</button>
+  <button onclick="exportarBackup()">💾 Exportar Copia</button>
+  <button onclick="document.getElementById('importFile').click()">📂 Importar Copia</button>
+  <input type="file" id="importFile" accept=".txt,.json" style="display:none" onchange="importarBackup(event)">
 </div>
 
 <div class="datebar">
@@ -188,12 +195,12 @@ label{font-size:0.76rem;color:#555;display:block;margin-bottom:2px;margin-top:5p
       <div class="stat-card"><div class="val" id="r-mes">0€</div><div class="lbl">Este mes</div></div>
     </div>
     <div class="card">
-      <h3>💰 Caja de hoy por método de pago</h3>
-      <div style="display:flex;justify-content:space-around;align-items:flex-end;gap:10px;">
+      <h3>💰 Caja del día seleccionado</h3>
+      <div style="display:flex;justify-content:space-around;gap:10px;">
         <div style="text-align:center;flex:1;"><div style="font-size:0.7rem;color:#888">💵 Efectivo</div><div class="big-num" id="r-cash" style="color:#198754">0€</div></div>
         <div style="text-align:center;flex:1;"><div style="font-size:0.7rem;color:#888">💳 Tarjeta</div><div class="big-num" id="r-card" style="color:#0d6efd">0€</div></div>
       </div>
-      <div style="text-align:center;margin-top:8px;font-size:0.7rem;color:#888">Total día: <strong id="r-totaldia" style="color:#023e8a">0€</strong></div>
+      <div style="text-align:center;margin-top:8px;font-size:0.7rem;color:#888">Total: <strong id="r-totaldia" style="color:#023e8a">0€</strong></div>
     </div>
     <div class="card">
       <h3>📅 Este mes vs mes anterior</h3>
@@ -203,6 +210,13 @@ label{font-size:0.76rem;color:#555;display:block;margin-bottom:2px;margin-top:5p
       </div>
       <div class="progress-wrap"><div class="progress-bar" id="r-bar" style="width:0%"></div></div>
       <div class="compare" id="r-compare"></div>
+    </div>
+    <div class="card">
+      <h3>💳 Este mes por método de pago</h3>
+      <div style="display:flex;justify-content:space-around;gap:10px;">
+        <div style="text-align:center;flex:1;"><div style="font-size:0.7rem;color:#888">💵 Efectivo mes</div><div class="big-num" id="r-mes-cash" style="color:#198754;font-size:1.3rem;">0€</div></div>
+        <div style="text-align:center;flex:1;"><div style="font-size:0.7rem;color:#888">💳 Tarjeta mes</div><div class="big-num" id="r-mes-card" style="color:#0d6efd;font-size:1.3rem;">0€</div></div>
+      </div>
     </div>
     <div class="card">
       <h3>🏖️ Hamacas más usadas (este mes)</h3>
@@ -229,23 +243,20 @@ label{font-size:0.76rem;color:#555;display:block;margin-bottom:2px;margin-top:5p
   </div>
 </div>
 
-<!-- MODAL MÉTODO DE PAGO (reemplaza confirm) -->
+<!-- MODAL PAGO -->
 <div class="modal-bg" id="payMethodBg">
   <div class="pay-modal">
     <h3>💰 Forma de pago</h3>
     <p id="payMethodDesc">¿Cómo ha pagado el cliente?</p>
     <div class="pay-btns">
-      <button class="pay-btn pay-cash" onclick="resolvePayMethod('cash')">
-        <span class="icon">💵</span><span class="label">Efectivo</span>
-      </button>
-      <button class="pay-btn pay-card" onclick="resolvePayMethod('card')">
-        <span class="icon">💳</span><span class="label">Tarjeta</span>
-      </button>
+      <button class="pay-btn pay-cash" onclick="resolvePayMethod('cash')"><span class="icon">💵</span><span class="label">Efectivo</span></button>
+      <button class="pay-btn pay-card" onclick="resolvePayMethod('card')"><span class="icon">💳</span><span class="label">Tarjeta</span></button>
     </div>
     <button class="pay-cancel" onclick="resolvePayMethod(null)">Cancelar</button>
   </div>
 </div>
 
+<!-- MODAL HAMACA -->
 <div class="modal-bg" id="modalBg">
   <div class="modal">
     <h2 id="modalTitle">Hamaca</h2>
@@ -288,13 +299,12 @@ label{font-size:0.76rem;color:#555;display:block;margin-bottom:2px;margin-top:5p
   </div>
 </div>
 
+<!-- MODAL GRUPAL -->
 <div class="modal-bg" id="groupModalBg">
   <div class="grp-modal">
     <h2>👥 Reserva grupal — <span id="groupCount">0</span> hamacas</h2>
-    <label>Nombre del grupo / cliente</label>
-    <input type="text" id="groupName" placeholder="Ej: Familia García">
-    <label>Teléfono (opcional)</label>
-    <input type="tel" id="groupPhone">
+    <label>Nombre del grupo / cliente</label><input type="text" id="groupName" placeholder="Ej: Familia García">
+    <label>Teléfono (opcional)</label><input type="tel" id="groupPhone">
     <label>¿Reserva de larga duración?</label>
     <div class="ld-toggle">
       <button id="gbLDno" class="active" onclick="toggleGroupLD(false)">Solo hoy</button>
@@ -313,16 +323,15 @@ label{font-size:0.76rem;color:#555;display:block;margin-bottom:2px;margin-top:5p
   </div>
 </div>
 
+<!-- MODAL AJUSTE -->
 <div class="modal-bg" id="ajusteBg">
   <div class="ajuste-modal">
     <h2>✏️ Ajustar total del día</h2>
     <label>Ajuste en caso de error o anulación</label>
-    <div style="display:flex;gap:7px;margin-bottom:6px;">
-      <input type="number" id="ajusteInput" placeholder="Importe a descontar (€)" min="0">
-    </div>
+    <input type="number" id="ajusteInput" placeholder="Importe a descontar (€)" min="0">
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeAjuste()">Cerrar</button>
-      <button class="btn-save" style="background:#dc3545" onclick="applyAjusteCustom()">Aplicar deducción</button>
+      <button class="btn-save" style="background:#dc3545" onclick="applyAjusteCustom()">Aplicar</button>
       <button class="btn-save" style="background:#6c757d;flex:0.5;" onclick="resetAjuste()">Reset</button>
     </div>
   </div>
@@ -335,12 +344,11 @@ var STATES={'libre':{pays:false,porcobrar:false},'ocupado-cobrado':{pays:true,po
 var STATE_CLASS={'libre':'s-libre','ocupado-cobrado':'s-oc','ocupado-sincobrar':'s-os','ocupado-nocobrar':'s-on','reservado':'s-re','reservado-cobrado':'s-rc','cobrado-visa':'s-vi','multiday':'s-multi'};
 var UMB=['#e63946','#f4a261','#2a9d8f','#e9c46a','#a8dadc','#ff6b6b','#c77dff','#06d6a0','#ffd166','#ef476f','#118ab2'];
 var GROUP_BORDER_COLORS=['#00f0ff','#ff007f','#39ff14','#ffff00','#ffa500','#ff4500','#9370db','#ff1493'];
-
 var currentDate=new Date(),selectedHamaca=null,selectedState='libre',data={};
 var groupMode=false,groupSelection=[],groupLDmode=false;
 var mudanzaMode=false,selectedHamacaOrigen=null;
 
-// ---- MODAL MÉTODO DE PAGO ----
+// ---- MODAL PAGO ----
 var _payResolve=null;
 function askMethod(desc){
   return new Promise(function(resolve){
@@ -381,23 +389,13 @@ function dayObj(key){if(!data[key])data[key]={hamacas:{},earned:0,ajuste:0,histo
 function addEarn(day,amt,method){day.earned=(day.earned||0)+amt;if(method==='card')day.card=(day.card||0)+amt;else day.cash=(day.cash||0)+amt;}
 function subEarn(day,amt,method){day.earned=Math.max(0,(day.earned||0)-amt);if(method==='card')day.card=Math.max(0,(day.card||0)-amt);else day.cash=Math.max(0,(day.cash||0)-amt);}
 function hId(r,p,s){return r+'-'+p+'-'+s;}
-function mds(){return data.__md||[];}function grps(){return data.__groups||[];}
+function mds(){return data.__md||[];}
+function grps(){return data.__groups||[];}
 function getMultiday(id,dateStr){return mds().find(function(m){return m.hId===id&&dateStr>=m.s&&dateStr<=m.e;})||null;}
 function getGroup(id,dateStr){return grps().find(function(g){return g.hamacas.indexOf(id)!==-1&&dateStr>=g.s&&dateStr<=g.e;})||null;}
-
-function getH(r,p,s){var key=dk(currentDate),id=hId(r,p,s);var md=getMultiday(id,key);if(md)return {state:'multiday',name:md.name,phone:md.phone,multiday:true,mdObj:md};var grp=getGroup(id,key);if(grp){var pf=!!(grp.paid&&grp.paid[id]);return {state:'group',name:grp.name,phone:grp.phone,group:true,grpObj:grp,paidForMe:pf};}return dayObj(key).hamacas[id]||{state:'libre',name:'',phone:''};}
+function getH(r,p,s){var key=dk(currentDate),id=hId(r,p,s);var md=getMultiday(id,key);if(md)return{state:'multiday',name:md.name,phone:md.phone,multiday:true,mdObj:md};var grp=getGroup(id,key);if(grp){var pf=!!(grp.paid&&grp.paid[id]);return{state:'group',name:grp.name,phone:grp.phone,group:true,grpObj:grp,paidForMe:pf};}return dayObj(key).hamacas[id]||{state:'libre',name:'',phone:''};}
 function getOccCount(id){var key=dk(currentDate),h=dayObj(key).history[id];if(!h)return 0;if(typeof h==='number')return h;if(h===true)return 1;return h.count||1;}
-
-function setH(r,p,s,state,name,phone,method){
-  var key=dk(currentDate),day=dayObj(key),id=hId(r,p,s);
-  var prev=day.hamacas[id]||{state:'libre'};
-  var nowPays=STATES[state]&&STATES[state].pays,wasPays=STATES[prev.state]&&STATES[prev.state].pays;
-  if(nowPays&&!wasPays){addEarn(day,PRICE,method||'cash');}
-  if(state!=='libre'&&(!prev.state||prev.state==='libre')){var h=day.history[id],n=0;if(typeof h==='number')n=h;else if(h===true)n=1;else if(h&&h.count)n=h.count;day.history[id]={count:n+1};}
-  var entry={state:state,name:name,phone:phone};if(nowPays)entry.method=method||prev.method||'cash';
-  day.hamacas[id]=entry;save();
-}
-
+function setH(r,p,s,state,name,phone,method){var key=dk(currentDate),day=dayObj(key),id=hId(r,p,s);var prev=day.hamacas[id]||{state:'libre'};var nowPays=STATES[state]&&STATES[state].pays,wasPays=STATES[prev.state]&&STATES[prev.state].pays;if(nowPays&&!wasPays){addEarn(day,PRICE,method||'cash');}if(state!=='libre'&&(!prev.state||prev.state==='libre')){var h=day.history[id],n=0;if(typeof h==='number')n=h;else if(h===true)n=1;else if(h&&h.count)n=h.count;day.history[id]={count:n+1};}var entry={state:state,name:name,phone:phone};if(nowPays)entry.method=method||prev.method||'cash';day.hamacas[id]=entry;save();}
 function addDays(dateStr,n){var d=new Date(dateStr+'T12:00:00');d.setDate(d.getDate()+n);return dk(d);}
 function daysBetween(a,b){var da=new Date(a+'T12:00:00'),db=new Date(b+'T12:00:00');return Math.round((db-da)/(1000*60*60*24));}
 
@@ -409,10 +407,35 @@ function addMd(r,p,s,startK,endK,price,name,phone,method){
   addEarn(dayObj(payKey),finalPrice,method||'cash');save();
 }
 
-function removeMdDay(id,dateStr){if(!data.__md)return;var idx=data.__md.findIndex(function(m){return m.hId===id&&dateStr>=m.s&&dateStr<=m.e;});if(idx===-1)return;var md=Object.assign({},data.__md[idx]);data.__md.splice(idx,1);var prev=addDays(dateStr,-1),next=addDays(dateStr,1);if(prev>=md.s)data.__md.push({hId:md.hId,s:md.s,e:prev,price:md.price,name:md.name,phone:md.phone,payDay:md.payDay,method:md.method});if(next<=md.e)data.__md.push({hId:md.hId,s:next,e:md.e,price:md.price,name:md.name,phone:md.phone,payDay:md.payDay,method:md.method});var pd=dayObj(md.payDay);subEarn(pd,PRICE,md.method||'cash');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;save();}
-function removeMdRest(id,dateStr){if(!data.__md)return;var idx=data.__md.findIndex(function(m){return m.hId===id&&dateStr>=m.s&&dateStr<=m.e;});if(idx===-1)return;var original=Object.assign({},data.__md[idx]);data.__md.splice(idx,1);var prev=addDays(dateStr,-1);if(prev>=original.s)data.__md.push({hId:original.hId,s:original.s,e:prev,price:original.price,name:original.name,phone:original.phone,payDay:original.payDay,method:original.method});var daysCancelled=daysBetween(dateStr,original.e)+1;var pd=dayObj(original.payDay);subEarn(pd,PRICE*daysCancelled,original.method||'cash');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;save();}
+// BUG 1 FIX: removeMdDay mantiene siempre el tramo posterior intacto
+function removeMdDay(id,dateStr){
+  if(!data.__md)return;
+  var idx=data.__md.findIndex(function(m){return m.hId===id&&dateStr>=m.s&&dateStr<=m.e;});
+  if(idx===-1)return;
+  var md=Object.assign({},data.__md[idx]);
+  data.__md.splice(idx,1);
+  var prev=addDays(dateStr,-1);
+  if(prev>=md.s)data.__md.push({hId:md.hId,s:md.s,e:prev,price:md.price,name:md.name,phone:md.phone,payDay:md.payDay,method:md.method});
+  // Tramo posterior SIEMPRE se mantiene
+  var next=addDays(dateStr,1);
+  if(next<=md.e)data.__md.push({hId:md.hId,s:next,e:md.e,price:md.price,name:md.name,phone:md.phone,payDay:md.payDay,method:md.method});
+  var pd=dayObj(md.payDay);subEarn(pd,PRICE,md.method||'cash');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;save();
+}
+
+function removeMdRest(id,dateStr){
+  if(!data.__md)return;
+  var idx=data.__md.findIndex(function(m){return m.hId===id&&dateStr>=m.s&&dateStr<=m.e;});
+  if(idx===-1)return;
+  var original=Object.assign({},data.__md[idx]);data.__md.splice(idx,1);
+  var prev=addDays(dateStr,-1);
+  if(prev>=original.s)data.__md.push({hId:original.hId,s:original.s,e:prev,price:original.price,name:original.name,phone:original.phone,payDay:original.payDay,method:original.method});
+  var daysCancelled=daysBetween(dateStr,original.e)+1;
+  var pd=dayObj(original.payDay);subEarn(pd,PRICE*daysCancelled,original.method||'cash');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;save();
+}
 
 // ---- GRUPOS ----
+function clonePaid(p){var o={};if(p)Object.keys(p).forEach(function(k){o[k]=p[k];});return o;}
+
 function saveGroup(){
   var name=document.getElementById('groupName').value.trim();if(!name){alert('Escribe un nombre');return;}
   if(groupSelection.length===0){alert('Selecciona al menos una hamaca');return;}
@@ -425,25 +448,56 @@ function saveGroup(){
   save();cancelGroupMode();buildMap();updateSummary();closeGroupModal();
 }
 
-function clonePaid(p){var o={};if(p)Object.keys(p).forEach(function(k){o[k]=p[k];});return o;}
+function removeFromGroup(){
+  if(!selectedHamaca)return;var r=selectedHamaca.r,p=selectedHamaca.p,s=selectedHamaca.s,id=hId(r,p,s),key=dk(currentDate);
+  if(!confirm('¿Anular esta hamaca del grupo solo para hoy?'))return;
+  var idx=data.__groups.findIndex(function(g){return g.hamacas.indexOf(id)!==-1&&key>=g.s&&key<=g.e;});if(idx===-1)return;
+  var g=Object.assign({},data.__groups[idx]);data.__groups.splice(idx,1);
+  var prev=addDays(key,-1),wasPaid=!!(g.paid&&g.paid[id]);
+  if(prev>=g.s)data.__groups.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:g.s,e:prev,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});
+  var lasDeHoy=g.hamacas.filter(function(h){return h!==id;});
+  if(lasDeHoy.length>0){var pTo=clonePaid(g.paid);delete pTo[id];data.__groups.push({hamacas:lasDeHoy,name:g.name,phone:g.phone,s:key,e:key,price:g.price,payDay:g.payDay,paid:pTo});}
+  var next=addDays(key,1);if(next<=g.e)data.__groups.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:next,e:g.e,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});
+  if(wasPaid){var wm=(g.paid&&g.paid[id])==='card'?'card':'cash';var pd=dayObj(g.payDay);subEarn(pd,PRICE,wm);if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;}
+  save();buildMap();updateSummary();closeModal();
+}
 
-function removeFromGroup(){if(!selectedHamaca)return;var r=selectedHamaca.r,p=selectedHamaca.p,s=selectedHamaca.s,id=hId(r,p,s),key=dk(currentDate);if(!confirm('¿Anular esta hamaca del grupo solo para hoy?'))return;var idx=data.__groups.findIndex(function(g){return g.hamacas.indexOf(id)!==-1&&key>=g.s&&key<=g.e;});if(idx===-1)return;var g=Object.assign({},data.__groups[idx]);data.__groups.splice(idx,1);var prev=addDays(key,-1),wasPaid=!!(g.paid&&g.paid[id]);if(prev>=g.s)data.__groups.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:g.s,e:prev,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});var lasDeHoy=g.hamacas.filter(function(h){return h!==id;});if(lasDeHoy.length>0){var pTo=clonePaid(g.paid);delete pTo[id];data.__groups.push({hamacas:lasDeHoy,name:g.name,phone:g.phone,s:key,e:key,price:g.price,payDay:g.payDay,paid:pTo});}var next=addDays(key,1);if(next<=g.e)data.__groups.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:next,e:g.e,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});if(wasPaid){var wm=(g.paid&&g.paid[id])==='card'?'card':'cash';var pd=dayObj(g.payDay);subEarn(pd,PRICE,wm);if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;}save();buildMap();updateSummary();closeModal();}
+function removeFromGroupRest(){
+  if(!selectedHamaca)return;var r=selectedHamaca.r,p=selectedHamaca.p,s=selectedHamaca.s,id=hId(r,p,s),key=dk(currentDate);
+  if(!confirm('¿Anular esta hamaca del grupo desde hoy hasta el final?'))return;
+  var idx=data.__groups.findIndex(function(g){return g.hamacas.indexOf(id)!==-1&&key>=g.s&&key<=g.e;});if(idx===-1)return;
+  var targetGroup=data.__groups[idx],gName=targetGroup.name,gPhone=targetGroup.phone,nuevas=[],refundCash=0,refundCard=0,pd=dayObj(targetGroup.payDay);
+  grps().forEach(function(g){
+    if(g.name!==gName||g.phone!==gPhone||g.e<key){nuevas.push(g);return;}
+    if(g.hamacas.indexOf(id)!==-1){
+      if(key>=g.s&&key<=g.e){var prev=addDays(key,-1);if(prev>=g.s){nuevas.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:g.s,e:prev,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});}var restH=g.hamacas.filter(function(h){return h!==id;});if(restH.length>0){var pTo=clonePaid(g.paid);delete pTo[id];nuevas.push({hamacas:restH,name:g.name,phone:g.phone,s:key,e:g.e,price:g.price,payDay:g.payDay,paid:pTo});}if(g.paid&&g.paid[id]){if(g.paid[id]==='card')refundCard+=PRICE;else refundCash+=PRICE;}}
+      else if(g.s>key){var cleanH=g.hamacas.filter(function(h){return h!==id;});if(cleanH.length>0){var pTo2=clonePaid(g.paid);delete pTo2[id];nuevas.push({hamacas:cleanH,name:g.name,phone:g.phone,s:g.s,e:g.e,price:g.price,payDay:g.payDay,paid:pTo2});}if(g.paid&&g.paid[id]){if(g.paid[id]==='card')refundCard+=PRICE;else refundCash+=PRICE;}}
+    } else {nuevas.push(g);}
+  });
+  data.__groups=nuevas;if(refundCash>0)subEarn(pd,refundCash,'cash');if(refundCard>0)subEarn(pd,refundCard,'card');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;
+  save();buildMap();updateSummary();closeModal();
+}
 
-function removeFromGroupRest(){if(!selectedHamaca)return;var r=selectedHamaca.r,p=selectedHamaca.p,s=selectedHamaca.s,id=hId(r,p,s),key=dk(currentDate);if(!confirm('¿Anular esta hamaca del grupo desde hoy hasta el final?'))return;var idx=data.__groups.findIndex(function(g){return g.hamacas.indexOf(id)!==-1&&key>=g.s&&key<=g.e;});if(idx===-1)return;var targetGroup=data.__groups[idx],gName=targetGroup.name,gPhone=targetGroup.phone,nuevas=[],refundCash=0,refundCard=0,pd=dayObj(targetGroup.payDay);grps().forEach(function(g){if(g.name!==gName||g.phone!==gPhone||g.e<key){nuevas.push(g);return;}if(g.hamacas.indexOf(id)!==-1){if(key>=g.s&&key<=g.e){var prev=addDays(key,-1);if(prev>=g.s){nuevas.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:g.s,e:prev,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});}var restH=g.hamacas.filter(function(h){return h!==id;});if(restH.length>0){var pTo=clonePaid(g.paid);delete pTo[id];nuevas.push({hamacas:restH,name:g.name,phone:g.phone,s:key,e:g.e,price:g.price,payDay:g.payDay,paid:pTo});}if(g.paid&&g.paid[id]){if(g.paid[id]==='card')refundCard+=PRICE;else refundCash+=PRICE;}}else if(g.s>key){var cleanH=g.hamacas.filter(function(h){return h!==id;});if(cleanH.length>0){var pTo2=clonePaid(g.paid);delete pTo2[id];nuevas.push({hamacas:cleanH,name:g.name,phone:g.phone,s:g.s,e:g.e,price:g.price,payDay:g.payDay,paid:pTo2});}if(g.paid&&g.paid[id]){if(g.paid[id]==='card')refundCard+=PRICE;else refundCash+=PRICE;}}}else{nuevas.push(g);}});data.__groups=nuevas;if(refundCash>0)subEarn(pd,refundCash,'cash');if(refundCard>0)subEarn(pd,refundCard,'card');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;save();buildMap();updateSummary();closeModal();}
-
-function deleteWholeGroup(){if(!selectedHamaca)return;var r=selectedHamaca.r,p=selectedHamaca.p,s=selectedHamaca.s,id=hId(r,p,s),key=dk(currentDate);var grp=getGroup(id,key);if(!grp)return;if(!confirm('¿Eliminar por completo el grupo desde hoy?'))return;var gName=grp.name,gPhone=grp.phone,nuevas=[],refundCash=0,refundCard=0,pd=dayObj(grp.payDay);function addRefund(p){if(!p)return;Object.keys(p).forEach(function(k){if(p[k]==='card')refundCard+=PRICE;else refundCash+=PRICE;});}grps().forEach(function(g){if(g.name!==gName||g.phone!==gPhone||g.e<key){nuevas.push(g);return;}if(key>=g.s&&key<=g.e){var prev=addDays(key,-1);if(prev>=g.s){nuevas.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:g.s,e:prev,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});}addRefund(g.paid);}else if(g.s>key){addRefund(g.paid);}});data.__groups=nuevas;if(refundCash>0)subEarn(pd,refundCash,'cash');if(refundCard>0)subEarn(pd,refundCard,'card');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;save();buildMap();updateSummary();closeModal();}
+function deleteWholeGroup(){
+  if(!selectedHamaca)return;var r=selectedHamaca.r,p=selectedHamaca.p,s=selectedHamaca.s,id=hId(r,p,s),key=dk(currentDate);
+  var grp=getGroup(id,key);if(!grp)return;if(!confirm('¿Eliminar por completo el grupo desde hoy?'))return;
+  var gName=grp.name,gPhone=grp.phone,nuevas=[],refundCash=0,refundCard=0,pd=dayObj(grp.payDay);
+  function addRefund(paid){if(!paid)return;Object.keys(paid).forEach(function(k){if(paid[k]==='card')refundCard+=PRICE;else refundCash+=PRICE;});}
+  grps().forEach(function(g){
+    if(g.name!==gName||g.phone!==gPhone||g.e<key){nuevas.push(g);return;}
+    if(key>=g.s&&key<=g.e){var prev=addDays(key,-1);if(prev>=g.s){nuevas.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:g.s,e:prev,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});}addRefund(g.paid);}
+    else if(g.s>key){addRefund(g.paid);}
+  });
+  data.__groups=nuevas;if(refundCash>0)subEarn(pd,refundCash,'cash');if(refundCard>0)subEarn(pd,refundCard,'card');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;
+  save();buildMap();updateSummary();closeModal();
+}
 
 function toggleGroupHamacaPaid(){
   if(!selectedHamaca)return;
   var r=selectedHamaca.r,p=selectedHamaca.p,s=selectedHamaca.s,id=hId(r,p,s),key=dk(currentDate);
   var grp=getGroup(id,key);if(!grp)return;if(!grp.paid)grp.paid={};var pd=dayObj(key);
   if(grp.paid[id]){var m=grp.paid[id]==='card'?'card':'cash';delete grp.paid[id];subEarn(pd,PRICE,m);if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;save();buildMap();updateSummary();closeModal();}
-  else{
-    askMethod('¿Cómo ha pagado esta hamaca?').then(function(method){
-      if(!method)return;
-      grp.paid[id]=method;addEarn(pd,PRICE,method);save();buildMap();updateSummary();closeModal();
-    });
-  }
+  else{askMethod('¿Cómo ha pagado esta hamaca?').then(function(method){if(!method)return;grp.paid[id]=method;addEarn(pd,PRICE,method);save();buildMap();updateSummary();closeModal();});}
 }
 
 function payWholeGroup(){
@@ -471,14 +525,59 @@ function shade(hex,pct){var n=parseInt(hex.replace('#',''),16)||0,r=(n>>16)+pct,
 function umbSVG(c){var s=shade(c,-25);return '<svg width="24" height="22" viewBox="0 0 30 28" xmlns="http://www.w3.org/2000/svg" style="display:block"><line x1="15" y1="7" x2="17" y2="27" stroke="#8B6914" stroke-width="1.8" stroke-linecap="round"/><path d="M2,12 Q15,1 28,12 Z" fill="'+c+'"/><path d="M2,12 Q8.5,6.5 15,7 L15,12 Q8.5,9 2,12 Z" fill="'+s+'" opacity="0.5"/><path d="M15,7 Q21.5,6.5 28,12 L15,12 Z" fill="'+s+'" opacity="0.25"/></svg>';}
 function hamSVG(color,isMulti,isGroup){var extra=isMulti?'<text x="19" y="21" text-anchor="middle" font-size="9" fill="white" font-weight="bold">∞</text>':isGroup?'<text x="19" y="21" text-anchor="middle" font-size="9" fill="white" font-weight="bold">G</text>':'';return '<svg viewBox="0 0 38 34" xmlns="http://www.w3.org/2000/svg" class="hamaca-svg"><ellipse cx="19" cy="33" rx="12" ry="2" fill="rgba(0,0,0,0.1)"/><line x1="9" y1="24" x2="6" y2="32" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/><line x1="29" y1="24" x2="32" y2="32" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="8" y2="26" stroke="#8B6914" stroke-width="1.8" stroke-linecap="round"/><line x1="32" y1="6" x2="30" y2="26" stroke="#8B6914" stroke-width="1.8" stroke-linecap="round"/><path d="M8,11 Q19,7 30,11 L28,25 Q19,28 10,25 Z" fill="'+color+'"/>'+extra+'</svg>';}
 
-function makeH(r,p,s){var h=getH(r,p,s),isMulti=!!h.multiday,isGroup=!!h.group,id=hId(r,p,s);var paidInGroup=isGroup&&h.paidForMe;var color=isMulti?'#198754':isGroup?(paidInGroup?'#212529':'#9b59b6'):(COLORS[h.state]||COLORS.libre);var wrap=document.createElement('div');wrap.className='hamaca-wrap';if(isGroup&&h.grpObj){var gc=getGroupColor(h.grpObj);if(gc)wrap.style.boxShadow='0 0 0 3px '+gc;}if(groupMode){if(groupSelection.indexOf(id)!==-1)wrap.classList.add('selected-group');wrap.onclick=function(){toggleHamacaSelection(id);};}else if(mudanzaMode){wrap.onclick=function(){handleMudanzaClick(r,p,s);};}else{wrap.onclick=function(){openModal(r,p,s);};}wrap.innerHTML=hamSVG(color,isMulti,isGroup);if(isGroup&&h.grpObj){var badge=document.createElement('div');badge.className='group-badge'+(paidInGroup?' paid':'');badge.textContent=h.grpObj.name.slice(0,12);wrap.appendChild(badge);}var occ=getOccCount(id);if(occ>1&&h.state!=='libre'){var rb=document.createElement('div');rb.className='reocc-badge';rb.textContent=occ;wrap.appendChild(rb);}var lbl=document.createElement('div');lbl.className='hamaca-name';lbl.textContent=(!isGroup&&h.name)?h.name.slice(0,7):'';wrap.appendChild(lbl);return wrap;}
+function makeH(r,p,s){
+  var h=getH(r,p,s),isMulti=!!h.multiday,isGroup=!!h.group,id=hId(r,p,s);
+  var paidInGroup=isGroup&&h.paidForMe;
+  var color=isMulti?'#198754':isGroup?(paidInGroup?'#212529':'#9b59b6'):(COLORS[h.state]||COLORS.libre);
+  var wrap=document.createElement('div');wrap.className='hamaca-wrap';
+  if(isGroup&&h.grpObj){var gc=getGroupColor(h.grpObj);if(gc)wrap.style.boxShadow='0 0 0 3px '+gc;}
+  if(groupMode){if(groupSelection.indexOf(id)!==-1)wrap.classList.add('selected-group');wrap.onclick=function(){toggleHamacaSelection(id);};}
+  else if(mudanzaMode){wrap.onclick=function(){handleMudanzaClick(r,p,s);};}
+  else{wrap.onclick=function(){openModal(r,p,s);};}
+  wrap.innerHTML=hamSVG(color,isMulti,isGroup);
+  if(isGroup&&h.grpObj){var badge=document.createElement('div');badge.className='group-badge'+(paidInGroup?' paid':'');badge.textContent=h.grpObj.name.slice(0,12);wrap.appendChild(badge);}
+  var occ=getOccCount(id);if(occ>1&&h.state!=='libre'){var rb=document.createElement('div');rb.className='reocc-badge';rb.textContent=occ;wrap.appendChild(rb);}
+  var lbl=document.createElement('div');lbl.className='hamaca-name';lbl.textContent=(!isGroup&&h.name)?h.name.slice(0,7):'';wrap.appendChild(lbl);
+  return wrap;
+}
 function stonePath(){var div=document.createElement('div');div.className='stone-path';for(var i=0;i<4;i++){var s=document.createElement('div');s.className='stone';div.appendChild(s);}return div;}
 function makePair(r,p){var div=document.createElement('div');div.className='pair';var uw=document.createElement('div');uw.innerHTML=umbSVG(UMB[(p-1)%UMB.length]);var beds=document.createElement('div');beds.className='pair-beds';beds.appendChild(makeH(r,p,'L'));beds.appendChild(makeH(r,p,'R'));div.appendChild(uw);div.appendChild(beds);return div;}
 function buildMap(){var map=document.getElementById('beachMap');map.innerHTML='';for(var r=1;r<=ROWS;r++){var row=document.createElement('div');row.className='row';var rn=document.createElement('div');rn.className='row-num';rn.textContent=r;row.appendChild(rn);var b1=document.createElement('div');b1.className='block';for(var p=1;p<=BLOCK1;p++)b1.appendChild(makePair(r,p));row.appendChild(b1);row.appendChild(stonePath());var b2=document.createElement('div');b2.className='block';for(var p2=BLOCK1+1;p2<=TOTAL_PAIRS;p2++)b2.appendChild(makePair(r,p2));row.appendChild(b2);map.appendChild(row);}}
 
 function updateSummary(){var key=dk(currentDate),ocupadas=0,libres=0,porcobrar=0;for(var r=1;r<=ROWS;r++)for(var p=1;p<=TOTAL_PAIRS;p++)['L','R'].forEach(function(s){var h=getH(r,p,s);if(h.state==='libre'){libres++;return;}ocupadas++;if(h.state==='group'){if(!h.paidForMe)porcobrar+=PRICE;}else if(STATES[h.state]&&STATES[h.state].porcobrar)porcobrar+=PRICE;});document.getElementById('s-ocupadas').textContent=ocupadas;document.getElementById('s-libres').textContent=libres;document.getElementById('s-porcobrar').textContent=porcobrar+'€';document.getElementById('s-total').textContent=dayTotal(key)+'€';}
 
-function updateResumen(){var y=currentDate.getFullYear(),m=currentDate.getMonth();var thisM=calcKeys(monthKeys(y,m)),pd=new Date(y,m-1,1),prevM=calcKeys(monthKeys(pd.getFullYear(),pd.getMonth()));var week=calcKeys(weekKeys()),day=dayTotal(dk(currentDate));document.getElementById('r-dia').textContent=day+'€';document.getElementById('r-sem').textContent=week+'€';document.getElementById('r-mes').textContent=thisM+'€';document.getElementById('r-mesnum').textContent=thisM+'€';document.getElementById('r-mesprev').textContent=prevM+'€';var dKey=dk(currentDate),dObj=data[dKey]||{};var ajuste=dObj.ajuste||0;var rawCash=dObj.cash||0,rawCard=dObj.card||0;if(!dObj.cash&&!dObj.card&&dObj.earned){rawCash=dObj.earned;}var cashShown=Math.max(0,rawCash-ajuste),cardShown=rawCard;document.getElementById('r-cash').textContent=cashShown+'€';document.getElementById('r-card').textContent=cardShown+'€';document.getElementById('r-totaldia').textContent=(cashShown+cardShown)+'€';document.getElementById('r-bar').style.width=(thisM/Math.max(thisM,prevM,1)*100)+'%';var diff=thisM-prevM,cmp=document.getElementById('r-compare');cmp.className='compare '+(diff>0?'pos':diff<0?'neg':'');cmp.textContent=diff>0?'▲ '+diff+'€ más':'▼ '+Math.abs(diff)+'€ menos';var counts={};monthKeys(y,m).forEach(function(k){var dd=data[k]||{};Object.entries(dd.hamacas||{}).forEach(function(e){if(e[1].state&&e[1].state!=='libre'){counts[e[0]]=(counts[e[0]]||0)+1;}});Object.keys(dd.history||{}).forEach(function(id){if(!dd.hamacas[id]||dd.hamacas[id].state==='libre'){counts[id]=(counts[id]||0)+1;}});});mds().forEach(function(md){counts[md.hId]=(counts[md.hId]||0)+(daysBetween(md.s,md.e)+1);});grps().forEach(function(g){var d=daysBetween(g.s,g.e)+1;g.hamacas.forEach(function(id){counts[id]=(counts[id]||0)+d;});});var sorted=Object.entries(counts).sort(function(a,b){return b[1]-a[1];}).slice(0,5);var top=document.getElementById('r-tophamacas');if(!sorted.length){top.textContent='Sin datos';return;}top.innerHTML=sorted.map(function(e){var pts=e[0].split('-'),pn=parseInt(pts[1])<=BLOCK1?pts[1]:parseInt(pts[1])-BLOCK1;return '<div>Fila '+pts[0]+'·P'+pn+'·'+pts[2]+' — <strong>'+e[1]+' días</strong></div>';}).join('');}
+// BUG 3 FIX: usa currentDate, no new Date()
+function updateResumen(){
+  var y=currentDate.getFullYear(),m=currentDate.getMonth();
+  var thisM=calcKeys(monthKeys(y,m)),pd=new Date(y,m-1,1),prevM=calcKeys(monthKeys(pd.getFullYear(),pd.getMonth()));
+  var week=calcKeys(weekKeys()),day=dayTotal(dk(currentDate));
+  document.getElementById('r-dia').textContent=day+'€';
+  document.getElementById('r-sem').textContent=week+'€';
+  document.getElementById('r-mes').textContent=thisM+'€';
+  document.getElementById('r-mesnum').textContent=thisM+'€';
+  document.getElementById('r-mesprev').textContent=prevM+'€';
+  // Caja del día seleccionado
+  var dKey=dk(currentDate),dObj=data[dKey]||{};
+  var ajuste=dObj.ajuste||0,rawCash=dObj.cash||0,rawCard=dObj.card||0;
+  if(!dObj.cash&&!dObj.card&&dObj.earned){rawCash=dObj.earned;}
+  var cashShown=Math.max(0,rawCash-ajuste),cardShown=rawCard;
+  document.getElementById('r-cash').textContent=cashShown+'€';
+  document.getElementById('r-card').textContent=cardShown+'€';
+  document.getElementById('r-totaldia').textContent=(cashShown+cardShown)+'€';
+  // Totales del mes por método
+  var monthCash=0,monthCard=0;
+  monthKeys(y,m).forEach(function(k){var d=data[k]||{},aj=d.ajuste||0,rc=d.cash||0,rk=d.card||0;if(!d.cash&&!d.card&&d.earned)rc=d.earned;monthCash+=Math.max(0,rc-aj);monthCard+=rk;});
+  document.getElementById('r-mes-cash').textContent=monthCash+'€';
+  document.getElementById('r-mes-card').textContent=monthCard+'€';
+  document.getElementById('r-bar').style.width=(thisM/Math.max(thisM,prevM,1)*100)+'%';
+  var diff=thisM-prevM,cmp=document.getElementById('r-compare');cmp.className='compare '+(diff>0?'pos':diff<0?'neg':'');cmp.textContent=diff>0?'▲ '+diff+'€ más':'▼ '+Math.abs(diff)+'€ menos';
+  var counts={};monthKeys(y,m).forEach(function(k){var dd=data[k]||{};Object.entries(dd.hamacas||{}).forEach(function(e){if(e[1].state&&e[1].state!=='libre'){counts[e[0]]=(counts[e[0]]||0)+1;}});Object.keys(dd.history||{}).forEach(function(id){if(!dd.hamacas[id]||dd.hamacas[id].state==='libre'){counts[id]=(counts[id]||0)+1;}});});
+  mds().forEach(function(md){counts[md.hId]=(counts[md.hId]||0)+(daysBetween(md.s,md.e)+1);});
+  grps().forEach(function(g){var d=daysBetween(g.s,g.e)+1;g.hamacas.forEach(function(id){counts[id]=(counts[id]||0)+d;});});
+  var sorted=Object.entries(counts).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+  var top=document.getElementById('r-tophamacas');if(!sorted.length){top.textContent='Sin datos';return;}
+  top.innerHTML=sorted.map(function(e){var pts=e[0].split('-'),pn=parseInt(pts[1])<=BLOCK1?pts[1]:parseInt(pts[1])-BLOCK1;return '<div>Fila '+pts[0]+'·P'+pn+'·'+pts[2]+' — <strong>'+e[1]+' días</strong></div>';}).join('');
+}
 
 function openAjuste(){document.getElementById('ajusteInput').value='';document.getElementById('ajusteBg').classList.add('open');}
 function closeAjuste(){document.getElementById('ajusteBg').classList.remove('open');}
@@ -490,10 +589,6 @@ function calcKeys(keys){return keys.reduce(function(a,k){return a+dayTotal(k);},
 function monthKeys(y,m){return Object.keys(data).filter(function(k){return k!=='__md'&&k!=='__groups'&&k.startsWith(y+'-'+String(m+1).padStart(2,'0'));});}
 function weekKeys(){var ks=[],d=new Date(currentDate),day=d.getDay()||7;d.setDate(d.getDate()-day+1);for(var i=0;i<7;i++){ks.push(dk(d));d.setDate(d.getDate()+1);}return ks;}
 
-function formatDate(d){var days=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return days[d.getDay()]+' '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();}
-function changeDate(n){currentDate=new Date(currentDate);currentDate.setDate(currentDate.getDate()+n);renderAll();}
-function goToday(){currentDate=new Date();renderAll();}
-
 function openModal(r,p,s){
   if(groupMode)return;if(mudanzaMode){handleMudanzaClick(r,p,s);return;}
   selectedHamaca={r:r,p:p,s:s};var h=getH(r,p,s),isM=!!h.multiday,isG=!!h.group;selectedState=isM||isG?'libre':h.state;
@@ -501,14 +596,13 @@ function openModal(r,p,s){
   var bmd=document.getElementById('infoBannerMd'),bgrp=document.getElementById('infoBannerGrp');
   ['btnCancelDay','btnCancelRest','btnRemoveFromGroup','btnRemoveFromGroupRest','btnDeleteGroup','btnPayGroupHamaca','btnPayWholeGroup','btnMoveHamaca'].forEach(function(id){document.getElementById(id).style.display='none';});
   if(isM&&h.mdObj){bmd.style.display='block';bgrp.style.display='none';bmd.innerHTML='<strong>📅 Reserva larga activa</strong>Del '+h.mdObj.s+' al '+h.mdObj.e+'<br>'+h.mdObj.price+'€';document.getElementById('btnCancelDay').style.display='block';document.getElementById('btnCancelRest').style.display='block';}
-  else if(isG&&h.grpObj){bgrp.style.display='block';bmd.style.display='none';var paidCount=h.grpObj.paid?Object.keys(h.grpObj.paid).length:0;var estadoCobro=h.paidForMe?'<br><strong style="color:#198754">✓ Esta hamaca COBRADA</strong>':'<br><strong style="color:#dc3545">⏳ Pendiente de cobro</strong>';bgrp.innerHTML='<strong>👥 Grupo: '+h.grpObj.name+'</strong>'+h.grpObj.hamacas.length+' hamacas · Cobradas: '+paidCount+'/'+h.grpObj.hamacas.length+estadoCobro;var btnPay=document.getElementById('btnPayGroupHamaca');btnPay.style.display='block';btnPay.textContent=h.paidForMe?'↩️ Desmarcar cobro de esta hamaca':'💰 Cobrar esta hamaca ('+PRICE+'€)';var pendientes=h.grpObj.hamacas.length-paidCount;if(pendientes>0){var btnAll=document.getElementById('btnPayWholeGroup');btnAll.style.display='block';btnAll.textContent='💰 Cobrar Grupo Entero ('+(pendientes*PRICE)+'€)';}document.getElementById('btnRemoveFromGroup').style.display='block';document.getElementById('btnRemoveFromGroupRest').style.display='block';document.getElementById('btnDeleteGroup').style.display='block';}
+  else if(isG&&h.grpObj){bgrp.style.display='block';bmd.style.display='none';var paidCount=h.grpObj.paid?Object.keys(h.grpObj.paid).length:0;var estadoCobro=h.paidForMe?'<br><strong style="color:#198754">✓ Esta hamaca COBRADA</strong>':'<br><strong style="color:#dc3545">⏳ Pendiente de cobro</strong>';bgrp.innerHTML='<strong>👥 Grupo: '+h.grpObj.name+'</strong>'+h.grpObj.hamacas.length+' hamacas · Cobradas: '+paidCount+'/'+h.grpObj.hamacas.length+estadoCobro;var btnPay=document.getElementById('btnPayGroupHamaca');btnPay.style.display='block';btnPay.textContent=h.paidForMe?'↩️ Desmarcar cobro':'💰 Cobrar esta hamaca ('+PRICE+'€)';var pendientes=h.grpObj.hamacas.length-paidCount;if(pendientes>0){var btnAll=document.getElementById('btnPayWholeGroup');btnAll.style.display='block';btnAll.textContent='💰 Cobrar Grupo Entero ('+(pendientes*PRICE)+'€)';}document.getElementById('btnRemoveFromGroup').style.display='block';document.getElementById('btnRemoveFromGroupRest').style.display='block';document.getElementById('btnDeleteGroup').style.display='block';}
   else{bmd.style.display='none';bgrp.style.display='none';}
   if(h.state!=='libre'||isM||isG){document.getElementById('btnMoveHamaca').style.display='block';}
   document.getElementById('nameInput').value=(isM||isG)?'':(h.name||'');document.getElementById('phoneInput').value=(isM||isG)?'':(h.phone||'');
   var today=dk(currentDate);document.getElementById('mdStart').value=today;document.getElementById('mdEnd').value=today;document.getElementById('mdPrice').value='';document.getElementById('mdName').value='';document.getElementById('mdPhone').value='';
   selectStateUI(selectedState);document.getElementById('modalBg').classList.add('open');
 }
-
 function selectStateUI(s){selectedState=s;document.getElementById('multidaySection').classList.toggle('visible',s==='multiday');document.getElementById('normalFields').style.display=s==='multiday'?'none':'block';document.querySelectorAll('.state-btn').forEach(function(b){b.classList.remove('selected');if(STATE_CLASS[s]&&b.classList.contains(STATE_CLASS[s]))b.classList.add('selected');});}
 function selectState(s,e){selectStateUI(s);}
 function closeModal(){document.getElementById('modalBg').classList.remove('open');selectedHamaca=null;}
@@ -524,31 +618,19 @@ function saveHamaca(){
     var start=document.getElementById('mdStart').value,end=document.getElementById('mdEnd').value;
     var price=document.getElementById('mdPrice').value,name=document.getElementById('mdName').value.trim(),phone=document.getElementById('mdPhone').value.trim();
     if(!start||!end){alert('Rellena las fechas.');return;}
-    // Solo para multiday preguntamos método
-    askMethod('¿Cómo ha pagado la reserva?').then(function(method){
-      if(!method)return;
-      addMd(r,p,s,start,end,price,name,phone,method);buildMap();updateSummary();closeModal();
-    });
+    askMethod('¿Cómo ha pagado la reserva?').then(function(method){if(!method)return;addMd(r,p,s,start,end,price,name,phone,method);buildMap();updateSummary();closeModal();});
     return;
   }
   var nm=document.getElementById('nameInput').value.trim(),ph=document.getElementById('phoneInput').value.trim();
   var md=getMultiday(id,key);if(md){data.__md=(data.__md||[]).filter(function(m){return m!==md;});save();}
   var grp=getGroup(id,key);
-  if(grp){var idx=data.__groups.indexOf(grp);if(idx!==-1){var g=Object.assign({},data.__groups[idx]);data.__groups.splice(idx,1);var prev=addDays(key,-1);var wasPaidMethod=(g.paid&&g.paid[id])||null;if(prev>=g.s)data.__groups.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:g.s,e:prev,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});var lasDeHoy=g.hamacas.filter(function(h){return h!==id;});if(lasDeHoy.length>0){var pTo=clonePaid(g.paid);delete pTo[id];data.__groups.push({hamacas:lasDeHoy,name:g.name,phone:g.phone,s:key,e:key,price:g.price,payDay:g.payDay,paid:pTo});}var next=addDays(key,1);if(next<=g.e)data.__groups.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:next,e:g.e,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});if(wasPaidMethod){var pd=dayObj(g.payDay);subEarn(pd,PRICE,wasPaidMethod==='card'?'card':'cash');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;}save();}}
-
-  // Determinar método según el estado elegido
+  if(grp){var gidx=data.__groups.indexOf(grp);if(gidx!==-1){var g=Object.assign({},data.__groups[gidx]);data.__groups.splice(gidx,1);var prev=addDays(key,-1);var wasPaidMethod=(g.paid&&g.paid[id])||null;if(prev>=g.s)data.__groups.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:g.s,e:prev,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});var lasDeHoy=g.hamacas.filter(function(h){return h!==id;});if(lasDeHoy.length>0){var pTo=clonePaid(g.paid);delete pTo[id];data.__groups.push({hamacas:lasDeHoy,name:g.name,phone:g.phone,s:key,e:key,price:g.price,payDay:g.payDay,paid:pTo});}var gnext=addDays(key,1);if(gnext<=g.e)data.__groups.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:gnext,e:g.e,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});if(wasPaidMethod){var gpd=dayObj(g.payDay);subEarn(gpd,PRICE,wasPaidMethod==='card'?'card':'cash');if(gpd.ajuste>gpd.earned)gpd.ajuste=gpd.earned;}save();}}
   var prevSt=(dayObj(key).hamacas[id]||{}).state||'libre';
   var willPay=STATES[selectedState]&&STATES[selectedState].pays,wasPay=STATES[prevSt]&&STATES[prevSt].pays;
   if(willPay&&!wasPay){
-    // ocupado-cobrado → efectivo directo; cobrado-visa → tarjeta directa; reservado-cobrado → preguntar
     if(selectedState==='cobrado-visa'){setH(r,p,s,selectedState,nm,ph,'card');buildMap();updateSummary();closeModal();}
     else if(selectedState==='ocupado-cobrado'){setH(r,p,s,selectedState,nm,ph,'cash');buildMap();updateSummary();closeModal();}
-    else{
-      askMethod('¿Cómo ha pagado el cliente?').then(function(method){
-        if(!method)return;
-        setH(r,p,s,selectedState,nm,ph,method);buildMap();updateSummary();closeModal();
-      });
-    }
+    else{askMethod('¿Cómo ha pagado el cliente?').then(function(method){if(!method)return;setH(r,p,s,selectedState,nm,ph,method);buildMap();updateSummary();closeModal();});}
     return;
   }
   setH(r,p,s,selectedState,nm,ph,null);buildMap();updateSummary();closeModal();
@@ -558,8 +640,47 @@ function startMudanza(){if(!selectedHamaca)return;selectedHamacaOrigen={r:select
 function cancelMudanza(){mudanzaMode=false;selectedHamacaOrigen=null;document.getElementById('mudanzaBar').classList.remove('active');buildMap();}
 function handleMudanzaClick(r,p,s){if(!mudanzaMode||!selectedHamacaOrigen)return;var o=selectedHamacaOrigen;if(r===o.r&&p===o.p&&s===o.s){alert('Es la misma hamaca.');return;}var destH=getH(r,p,s);if(destH.state!=='libre'){alert('La hamaca destino debe estar libre');return;}var key=dk(currentDate),originId=hId(o.r,o.p,o.s),destId=hId(r,p,s),day=dayObj(key);var md=getMultiday(originId,key);if(md){(data.__md||[]).forEach(function(m){if(m===md)m.hId=destId;});save();cancelMudanza();updateSummary();return;}var grp=getGroup(originId,key);if(grp){var idx=grp.hamacas.indexOf(originId);if(idx!==-1){grp.hamacas.splice(idx,1,destId);}if(grp.paid&&grp.paid[originId]){grp.paid[destId]=true;delete grp.paid[originId];}save();cancelMudanza();buildMap();updateSummary();return;}var orig=day.hamacas[originId];if(orig){day.hamacas[destId]={state:orig.state,name:orig.name||'',phone:orig.phone||''};delete day.hamacas[originId];if(day.history&&day.history[originId]){day.history[destId]=day.history[originId];delete day.history[originId];}save();}cancelMudanza();updateSummary();}
 
-function exportDay(){var key=dk(currentDate),day=data[key],total=dayTotal(key);var txt='RESUMEN '+formatDate(currentDate)+'\nTOTAL: '+total+'€';var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='hamacas_'+key+'.txt';a.click();}
+// ---- PANEL DE CONTROL ----
+function vaciarDia(){
+  var key=dk(currentDate);
+  if(!confirm('⚠️ ¿Vaciar COMPLETAMENTE el día '+key+'?\n\nSe borrarán hamacas, historial y caja de ese día. El resto no se toca.'))return;
+  if(!confirm('Segunda confirmación: ¿Seguro que quieres vaciar el día '+key+'?'))return;
+  data[key]={hamacas:{},earned:0,ajuste:0,history:{},cash:0,card:0};
+  save();toggleMenu(false);renderAll();
+}
+function exportarBackup(){
+  var backup={hamacas_v5:data};
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
+  a.download='backup_playa_'+dk(new Date())+'.txt';
+  a.click();toggleMenu(false);
+}
+function importarBackup(e){
+  var file=e.target.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      var backup=JSON.parse(ev.target.result);
+      if(!backup.hamacas_v5)throw new Error('Formato incorrecto');
+      if(!confirm('⚠️ ¿Restaurar copia?\n\nSe sobreescribirán TODOS los datos actuales. No se puede deshacer.'))return;
+      localStorage.setItem('hamacas_v5',JSON.stringify(backup.hamacas_v5));
+      alert('✅ Copia restaurada. La app se recargará.');
+      location.reload();
+    }catch(err){alert('❌ Archivo no válido. Usa una copia de seguridad exportada desde esta app.');}
+  };
+  reader.readAsText(file);
+  e.target.value='';toggleMenu(false);
+}
 
+function exportDay(){
+  var key=dk(currentDate),day=data[key],total=dayTotal(key);
+  var txt='RESUMEN '+formatDate(currentDate)+'\nTOTAL: '+total+'€';
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='hamacas_'+key+'.txt';a.click();
+}
+
+function formatDate(d){var days=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return days[d.getDay()]+' '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();}
+function changeDate(n){currentDate=new Date(currentDate);currentDate.setDate(currentDate.getDate()+n);renderAll();}
+function goToday(){currentDate=new Date();renderAll();}
 function showScreen(s){toggleMenu(false);if(s==='mapa'){document.getElementById('mainView').classList.add('active');document.getElementById('resumenScreen').classList.remove('active');setTimeout(resetZoom,50);}else{document.getElementById('mainView').classList.remove('active');document.getElementById('resumenScreen').classList.add('active');updateResumen();}}
 function renderAll(){document.getElementById('dateLabel').textContent=formatDate(currentDate);buildMap();updateSummary();setTimeout(resetZoom,60);}
 
