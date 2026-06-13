@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0077b6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Los Leones">
+<title>Playa Los Leones</title>
+<script>
+var mf={name:"Playa Los Leones",short_name:"Los Leones",start_url:"./",display:"standalone",background_color:"#f0f4f8",theme_color:"#0077b6",icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%230077b6'/><text y='130' x='96' text-anchor='middle' font-size='110'>🏖️</text></svg>",sizes:"192x192",type:"image/svg+xml"}]};
+var mb=new Blob([JSON.stringify(mf)],{type:'application/json'});
+var ml=document.createElement('link');ml.rel='manifest';ml.href=URL.createObjectURL(mb);document.head.appendChild(ml);
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+.header{background:linear-gradient(135deg,#0077b6,#00b4d8);color:white;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.2);flex-shrink:0;z-index:100;}
+.header h1{font-size:1.05rem;font-weight:700;}
+.menu-trigger{background:rgba(255,255,255,0.2);border:none;color:white;font-size:1.2rem;padding:4px 10px;border-radius:6px;cursor:pointer;font-weight:bold;}
+.menu-trigger:active{background:rgba(255,255,255,0.4);}
+.datebar{background:white;display:flex;align-items:center;justify-content:center;gap:10px;padding:8px;box-shadow:0 1px 4px rgba(0,0,0,0.1);flex-shrink:0;z-index:90;}
+.datebar button{background:#0077b6;color:white;border:none;border-radius:50%;width:32px;height:32px;font-size:1.1rem;cursor:pointer;flex-shrink:0;}
+.datebar span{font-weight:700;font-size:0.85rem;color:#333;min-width:148px;text-align:center;}
+.today-btn{background:#00b4d8!important;border-radius:8px!important;width:auto!important;padding:0 10px!important;font-size:0.72rem!important;height:32px!important;}
+.summary{background:#023e8a;color:white;display:flex;justify-content:space-around;padding:8px 4px;font-size:0.68rem;flex-shrink:0;z-index:90;box-shadow:0 1px 4px rgba(0,0,0,0.15);}
+.summary div{text-align:center;}
+.summary span{display:block;font-size:0.88rem;font-weight:700;}
+.total-tap{cursor:pointer;}
+.total-tap span::after{content:' ✏️';font-size:0.55rem;}
+.screen-view{position:absolute;top:150px;bottom:0;left:0;right:0;display:none;flex-direction:column;overflow:hidden;}
+.screen-view.active{display:flex;}
+.beach-outer{flex:1;width:100%;background:#bfa15f;position:relative;overflow:hidden;touch-action:none;z-index:10;}
+.beach-scaler{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;}
+.beach{background:radial-gradient(ellipse at 20% 30%,rgba(255,255,255,0.18) 0%,transparent 50%),linear-gradient(160deg,#f5deb3 0%,#e8c97a 40%,#d4a843 100%);padding:14px;position:relative;display:inline-block;border-radius:4px;}
+.beach::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(180,140,60,0.22) 1px,transparent 1px);background-size:8px 8px;pointer-events:none;}
+.beach-inner{display:flex;flex-direction:column;gap:5px;position:relative;}
+.row{display:flex;align-items:flex-end;}
+.row-num{font-size:0.6rem;font-weight:800;color:rgba(100,70,20,0.7);width:14px;text-align:center;margin-bottom:5px;}
+.block{display:flex;align-items:flex-end;}
+.stone-path{width:16px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:3px;gap:2px;}
+.stone{width:11px;height:6px;border-radius:40%;background:radial-gradient(ellipse at 35% 35%,#b0a090,#7a6a58);box-shadow:inset 0 1px 1px rgba(255,255,255,0.3),0 1px 2px rgba(0,0,0,0.3);}
+.pair{display:flex;flex-direction:column;align-items:center;margin:0 2px;flex-shrink:0;position:relative;}
+.pair-umbrella{margin-bottom:-3px;z-index:2;position:relative;}
+.pair-beds{display:flex;gap:2px;align-items:flex-end;}
+.hamaca-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;position:relative;width:30px;}
+.hamaca-svg{width:30px;height:30px;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.22));}
+.hamaca-name{font-size:0.38rem;font-weight:700;color:#3d2500;text-align:center;width:30px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;text-shadow:0 0 3px rgba(255,255,255,0.9);}
+.hamaca-wrap.selected-group::after{content:'✓';position:absolute;top:-4px;right:-4px;background:#198754;color:white;border-radius:50%;width:14px;height:14px;font-size:0.6rem;font-weight:900;z-index:10;line-height:14px;text-align:center;}
+.group-badge{position:absolute;top:-5px;left:50%;transform:translateX(-50%);background:#9b59b6;color:white;font-size:0.34rem;font-weight:800;border-radius:3px;padding:1px 2px;white-space:nowrap;z-index:5;max-width:44px;overflow:hidden;text-overflow:ellipsis;}
+.group-badge.paid{background:#212529;}
+.reocc-badge{position:absolute;top:-4px;left:-4px;background:#ff6b35;color:white;font-size:0.5rem;font-weight:900;border-radius:50%;width:13px;height:13px;line-height:13px;text-align:center;z-index:6;}
+.fab-group-btn{position:fixed;bottom:20px;right:20px;background:linear-gradient(135deg,#9b59b6,#8e44ad);color:white;border:none;width:60px;height:60px;border-radius:50%;font-size:1.6rem;box-shadow:0 5px 15px rgba(0,0,0,0.4);cursor:pointer;z-index:80;display:flex;align-items:center;justify-content:center;}
+.fab-group-btn:active{transform:scale(0.92);}
+.group-bar{position:fixed;bottom:0;left:0;right:0;background:#ffc107;color:#333;padding:12px 14px;z-index:85;display:none;align-items:center;justify-content:space-between;box-shadow:0 -3px 12px rgba(0,0,0,0.2);}
+.group-bar.active{display:flex;}
+.group-bar span{font-size:0.85rem;font-weight:700;}
+.group-bar-btns{display:flex;gap:8px;}
+.group-bar-btns button{padding:8px 14px;border:none;border-radius:6px;font-size:0.75rem;font-weight:700;cursor:pointer;}
+.gb-cancel{background:rgba(0,0,0,0.12);color:#333;}.gb-confirm{background:#023e8a;color:white;}
+.dropdown-menu{display:none;position:fixed;top:52px;right:12px;background:white;border-radius:12px;box-shadow:0 4px 22px rgba(0,0,0,0.3);z-index:200;width:180px;overflow:hidden;}
+.dropdown-menu.open{display:block;}
+.dropdown-menu button{width:100%;padding:12px 16px;background:none;border:none;text-align:left;font-size:0.88rem;color:#333;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee;}
+.dropdown-menu button:last-child{border-bottom:none;}
+.menu-overlay-close{display:none;position:fixed;inset:0;z-index:190;}
+.menu-overlay-close.open{display:block;}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:220;align-items:flex-end;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal,.grp-modal,.ajuste-modal{background:white!important;border-radius:20px 20px 0 0;padding:16px;width:100%;max-width:500px;box-shadow:0 -4px 25px rgba(0,0,0,0.3);overflow-y:auto;}
+.modal,.grp-modal{max-height:82vh;}.ajuste-modal{max-height:50vh;}
+h2{font-size:0.92rem;margin-bottom:11px;color:#023e8a;font-weight:700;}
+.state-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:9px;}
+.state-btn{padding:9px 5px;border:2px solid transparent;border-radius:9px;font-size:0.7rem;font-weight:700;color:white;cursor:pointer;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,0.3);line-height:1.2;}
+.state-btn.selected{border-color:#000;box-shadow:0 0 0 3px rgba(0,0,0,0.2);}
+.s-libre{background:#adb5bd;color:#333!important;text-shadow:none!important;}
+.s-oc{background:#212529;}.s-os{background:#dc3545;}.s-on{background:#fd7e14;}
+.s-re{background:#0d6efd;}.s-rc{background:#198754;}
+.s-vi{background:#ffc107;color:#333!important;text-shadow:none!important;}
+.s-multi{background:linear-gradient(135deg,#198754,#0d6efd);grid-column:span 2;}
+.s-cancel{background:#dc3545;grid-column:span 2;margin-top:2px;}
+input{width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:9px;font-size:0.88rem;margin-bottom:6px;background:white;color:#333;}
+label{font-size:0.76rem;color:#555;display:block;margin-bottom:2px;margin-top:5px;font-weight:600;}
+.modal-btns{display:flex;gap:7px;margin-top:12px;}
+.modal-btns button{flex:1;padding:12px;border:none;border-radius:9px;font-size:0.88rem;font-weight:700;cursor:pointer;}
+.btn-cancel{background:#f1f3f5;color:#555;}.btn-save{background:#0077b6;color:white;}
+.legend-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:230;align-items:flex-end;justify-content:center;}
+.legend-overlay.open{display:flex;}
+.legend-content{background:white;width:100%;max-width:500px;border-radius:20px 20px 0 0;padding:16px;}
+.legend-content h3{font-size:0.9rem;color:#023e8a;margin-bottom:12px;font-weight:700;display:flex;justify-content:space-between;align-items:center;}
+.legend-content h3 button{background:none;border:none;font-size:1.2rem;color:#666;cursor:pointer;}
+.legend-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#333;}
+.legend-dot{width:14px;height:14px;border-radius:4px;flex-shrink:0;}
+.multiday-section{display:none;background:#f0fff4;border:1.5px solid #198754;border-radius:11px;padding:11px;margin-bottom:7px;}
+.multiday-section.visible{display:block;}
+.multiday-section h3{font-size:0.8rem;color:#198754;margin-bottom:5px;font-weight:700;}
+.info-banner{border-radius:9px;padding:9px 11px;margin-bottom:7px;font-size:0.78rem;}
+.info-banner strong{display:block;margin-bottom:3px;}
+.info-md{background:#fff3cd;border:1.5px solid #ffc107;color:#856404;}
+.info-grp{background:#f3e6ff;border:1.5px solid #9b59b6;color:#5b2c8d;}
+.ld-toggle{display:flex;gap:8px;margin-bottom:7px;}
+.ld-toggle button{flex:1;padding:8px;border:2px solid #ddd;border-radius:8px;background:white;color:#555;font-weight:700;font-size:0.78rem;cursor:pointer;}
+.ld-toggle button.active{background:#198754;color:white;border-color:#198754;}
+.resumen-scrollable{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch;}
+.card{background:white;border-radius:13px;padding:14px;margin-bottom:11px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.card h3{font-size:0.82rem;color:#666;margin-bottom:9px;}
+.stats-row{display:flex;gap:7px;margin-bottom:11px;}
+.stat-card{flex:1;background:white;border-radius:11px;padding:11px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.06);}
+.stat-card .val{font-size:1.15rem;font-weight:800;color:#023e8a;}
+.stat-card .lbl{font-size:0.6rem;color:#888;margin-top:2px;}
+.big-num{font-size:1.7rem;font-weight:800;color:#023e8a;}
+.progress-wrap{background:#e9ecef;border-radius:20px;height:11px;margin-top:7px;overflow:hidden;}
+.progress-bar{height:100%;border-radius:20px;background:linear-gradient(90deg,#0077b6,#00b4d8);transition:width 0.6s;}
+.compare{margin-top:7px;font-size:0.82rem;font-weight:600;}
+.compare.pos{color:#198754;}.compare.neg{color:#dc3545;}
+.export-btn{width:100%;padding:13px;background:#0077b6;color:white;border:none;border-radius:11px;font-size:0.92rem;font-weight:700;cursor:pointer;}
+
+/* MODAL MÉTODO DE PAGO */
+.pay-modal{background:white;border-radius:20px 20px 0 0;padding:20px 16px;width:100%;max-width:500px;}
+.pay-modal h3{font-size:1rem;color:#023e8a;font-weight:700;margin-bottom:6px;text-align:center;}
+.pay-modal p{font-size:0.78rem;color:#888;text-align:center;margin-bottom:16px;}
+.pay-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pay-btn{padding:16px 10px;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.pay-btn span.icon{font-size:1.6rem;}
+.pay-btn span.label{font-size:0.85rem;}
+.pay-cash{background:#e8f5e9;color:#198754;border:2px solid #198754;}
+.pay-card{background:#e3f2fd;color:#0d6efd;border:2px solid #0d6efd;}
+.pay-cancel{margin-top:10px;width:100%;padding:11px;border:none;border-radius:9px;background:#f1f3f5;color:#555;font-weight:700;font-size:0.88rem;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏖️ Playa Los Leones</h1>
+  <button class="menu-trigger" onclick="toggleMenu(true)">☰</button>
+</div>
+
+<div class="menu-overlay-close" id="menuOverlayClose" onclick="toggleMenu(false)"></div>
+<div class="dropdown-menu" id="dropdownMenu">
+  <button onclick="showScreen('mapa')">🗺️ Ver Mapa</button>
+  <button onclick="showScreen('resumen')">📊 Ver Resumen</button>
+  <button onclick="toggleLegend(true)">🎨 Ver Leyenda</button>
+</div>
+
+<div class="datebar">
+  <button onclick="changeDate(-1)">‹</button>
+  <span id="dateLabel"></span>
+  <button class="today-btn" onclick="goToday()">Hoy</button>
+  <button onclick="changeDate(1)">›</button>
+</div>
+
+<div class="summary">
+  <div>Ocupadas<span id="s-ocupadas">0</span></div>
+  <div>Libres<span id="s-libres">0</span></div>
+  <div>Por cobrar<span id="s-porcobrar">0€</span></div>
+  <div class="total-tap" onclick="openAjuste()">Total día<span id="s-total">0€</span></div>
+</div>
+
+<div id="mainView" class="screen-view active">
+  <div class="beach-outer" id="beachOuter">
+    <div class="beach-scaler" id="beachScaler">
+      <div class="beach" id="beach">
+        <div class="beach-inner" id="beachMap"></div>
+      </div>
+    </div>
+  </div>
+  <button class="fab-group-btn" id="fabGroup" onclick="startGroupMode()">👥</button>
+  <div class="group-bar" id="groupBar">
+    <span id="groupBarLabel">👥 Toca las hamacas del grupo</span>
+    <div class="group-bar-btns">
+      <button class="gb-cancel" onclick="cancelGroupMode()">✕</button>
+      <button class="gb-confirm" onclick="confirmGroupSelection()">✓ Guardar</button>
+    </div>
+  </div>
+  <div class="group-bar" id="mudanzaBar" style="background:#0d6efd;color:white;">
+    <span>🔄 Selecciona la nueva hamaca libre…</span>
+    <div class="group-bar-btns">
+      <button class="gb-cancel" style="background:rgba(255,255,255,0.25);color:white" onclick="cancelMudanza()">✕</button>
+    </div>
+  </div>
+</div>
+
+<div id="resumenScreen" class="screen-view">
+  <div class="resumen-scrollable">
+    <div class="stats-row">
+      <div class="stat-card"><div class="val" id="r-dia">0€</div><div class="lbl">Hoy</div></div>
+      <div class="stat-card"><div class="val" id="r-sem">0€</div><div class="lbl">Esta semana</div></div>
+      <div class="stat-card"><div class="val" id="r-mes">0€</div><div class="lbl">Este mes</div></div>
+    </div>
+    <div class="card">
+      <h3>💰 Caja de hoy por método de pago</h3>
+      <div style="display:flex;justify-content:space-around;align-items:flex-end;gap:10px;">
+        <div style="text-align:center;flex:1;"><div style="font-size:0.7rem;color:#888">💵 Efectivo</div><div class="big-num" id="r-cash" style="color:#198754">0€</div></div>
+        <div style="text-align:center;flex:1;"><div style="font-size:0.7rem;color:#888">💳 Tarjeta</div><div class="big-num" id="r-card" style="color:#0d6efd">0€</div></div>
+      </div>
+      <div style="text-align:center;margin-top:8px;font-size:0.7rem;color:#888">Total día: <strong id="r-totaldia" style="color:#023e8a">0€</strong></div>
+    </div>
+    <div class="card">
+      <h3>📅 Este mes vs mes anterior</h3>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div><div style="font-size:0.68rem;color:#888">Este mes</div><div class="big-num" id="r-mesnum">0€</div></div>
+        <div style="text-align:right"><div style="font-size:0.68rem;color:#888">Mes anterior</div><div style="font-size:1.15rem;font-weight:700;color:#adb5bd" id="r-mesprev">0€</div></div>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" id="r-bar" style="width:0%"></div></div>
+      <div class="compare" id="r-compare"></div>
+    </div>
+    <div class="card">
+      <h3>🏖️ Hamacas más usadas (este mes)</h3>
+      <div id="r-tophamacas" style="font-size:0.82rem;color:#444;line-height:1.9"></div>
+    </div>
+    <button class="export-btn" onclick="exportDay()">📄 Exportar resumen del día</button>
+  </div>
+</div>
+
+<div class="legend-overlay" id="legendOverlay">
+  <div class="legend-content">
+    <h3>🎨 Código de colores <button onclick="toggleLegend(false)">✕</button></h3>
+    <div class="legend-grid">
+      <div class="legend-item"><div class="legend-dot" style="background:#212529"></div>Ocup.Cobrado</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc3545"></div>Sin cobrar</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fd7e14"></div>No cobrar</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#0d6efd"></div>Reservado</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#198754"></div>Reserv.Cobrado</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dee2e6;border:1px solid #adb5bd"></div>Libre</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ffc107"></div>Visa</div>
+      <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#198754,#0d6efd)"></div>Larga dur.</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#9b59b6"></div>Grupal</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MÉTODO DE PAGO (reemplaza confirm) -->
+<div class="modal-bg" id="payMethodBg">
+  <div class="pay-modal">
+    <h3>💰 Forma de pago</h3>
+    <p id="payMethodDesc">¿Cómo ha pagado el cliente?</p>
+    <div class="pay-btns">
+      <button class="pay-btn pay-cash" onclick="resolvePayMethod('cash')">
+        <span class="icon">💵</span><span class="label">Efectivo</span>
+      </button>
+      <button class="pay-btn pay-card" onclick="resolvePayMethod('card')">
+        <span class="icon">💳</span><span class="label">Tarjeta</span>
+      </button>
+    </div>
+    <button class="pay-cancel" onclick="resolvePayMethod(null)">Cancelar</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h2 id="modalTitle">Hamaca</h2>
+    <div id="infoBannerMd" class="info-banner info-md" style="display:none"></div>
+    <div id="infoBannerGrp" class="info-banner info-grp" style="display:none"></div>
+    <div class="state-grid">
+      <button class="state-btn s-libre" onclick="selectState('libre',event)">⬜ Libre</button>
+      <button class="state-btn s-oc" onclick="selectState('ocupado-cobrado',event)">⬛ Ocup.Cobrado</button>
+      <button class="state-btn s-os" onclick="selectState('ocupado-sincobrar',event)">🟥 Sin cobrar</button>
+      <button class="state-btn s-on" onclick="selectState('ocupado-nocobrar',event)">🟧 No cobrar</button>
+      <button class="state-btn s-re" onclick="selectState('reservado',event)">🟦 Reservado</button>
+      <button class="state-btn s-rc" onclick="selectState('reservado-cobrado',event)">🟩 Reserv.Cobrado</button>
+      <button class="state-btn s-vi" onclick="selectState('cobrado-visa',event)">🟨 Cobrado Visa</button>
+      <button class="state-btn s-multi" onclick="selectState('multiday',event)">📅 Reserva larga duración</button>
+      <button class="state-btn s-cancel" id="btnCancelDay" onclick="cancelMdDay()" style="display:none">🗑️ Anular Hamaca Individual (Hoy)</button>
+      <button class="state-btn s-cancel" id="btnCancelRest" onclick="cancelMdRest()" style="display:none">🗑️ Anular Hamaca Individual (Días Restantes)</button>
+      <button class="state-btn s-cancel" id="btnRemoveFromGroup" onclick="removeFromGroup()" style="display:none">🗑️ Anular Hamaca Individual (Hoy)</button>
+      <button class="state-btn s-cancel" id="btnRemoveFromGroupRest" onclick="removeFromGroupRest()" style="display:none">🗑️ Anular Hamaca Individual (Días Restantes)</button>
+      <button class="state-btn s-cancel" id="btnDeleteGroup" onclick="deleteWholeGroup()" style="display:none">🗑️ Eliminar Grupo entero</button>
+      <button class="state-btn s-oc" id="btnPayGroupHamaca" onclick="toggleGroupHamacaPaid()" style="display:none;grid-column:span 2;">💰 Cobrar esta hamaca</button>
+      <button class="state-btn s-oc" id="btnPayWholeGroup" onclick="payWholeGroup()" style="display:none;grid-column:span 2;background:#198754;">💰 Cobrar Grupo Entero (Hoy)</button>
+      <button class="state-btn" id="btnMoveHamaca" onclick="startMudanza()" style="display:none;grid-column:span 2;background:#0d6efd;color:white;">🔄 Cambiar de Hamaca</button>
+    </div>
+    <div class="multiday-section" id="multidaySection">
+      <h3>📅 Nueva reserva de larga duración</h3>
+      <label>Fecha inicio</label><input type="date" id="mdStart">
+      <label>Fecha fin</label><input type="date" id="mdEnd">
+      <label>Precio total cobrado (€)</label><input type="number" id="mdPrice" placeholder="Vacío = 8€ × días" min="0">
+      <label>Nombre cliente</label><input type="text" id="mdName" placeholder="Nombre">
+      <label>Teléfono (opcional)</label><input type="tel" id="mdPhone">
+    </div>
+    <div id="normalFields">
+      <label>Nombre cliente (opcional)</label><input type="text" id="nameInput" placeholder="Nombre">
+      <label>Teléfono (opcional)</label><input type="tel" id="phoneInput">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveHamaca()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="groupModalBg">
+  <div class="grp-modal">
+    <h2>👥 Reserva grupal — <span id="groupCount">0</span> hamacas</h2>
+    <label>Nombre del grupo / cliente</label>
+    <input type="text" id="groupName" placeholder="Ej: Familia García">
+    <label>Teléfono (opcional)</label>
+    <input type="tel" id="groupPhone">
+    <label>¿Reserva de larga duración?</label>
+    <div class="ld-toggle">
+      <button id="gbLDno" class="active" onclick="toggleGroupLD(false)">Solo hoy</button>
+      <button id="gbLDyes" onclick="toggleGroupLD(true)">Varios días</button>
+    </div>
+    <div id="groupLDfields" style="display:none">
+      <label>Fecha inicio</label><input type="date" id="groupMdStart">
+      <label>Fecha fin</label><input type="date" id="groupMdEnd">
+    </div>
+    <label>Precio total (€) — opcional</label>
+    <input type="number" id="groupPrice" placeholder="Vacío = 8€ × hamacas × días" min="0">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeGroupModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveGroup()">Guardar grupo</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="ajusteBg">
+  <div class="ajuste-modal">
+    <h2>✏️ Ajustar total del día</h2>
+    <label>Ajuste en caso de error o anulación</label>
+    <div style="display:flex;gap:7px;margin-bottom:6px;">
+      <input type="number" id="ajusteInput" placeholder="Importe a descontar (€)" min="0">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeAjuste()">Cerrar</button>
+      <button class="btn-save" style="background:#dc3545" onclick="applyAjusteCustom()">Aplicar deducción</button>
+      <button class="btn-save" style="background:#6c757d;flex:0.5;" onclick="resetAjuste()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var ROWS=7,BLOCK1=6,BLOCK2=5,TOTAL_PAIRS=BLOCK1+BLOCK2,PRICE=8;
+var COLORS={'libre':'#dee2e6','ocupado-cobrado':'#212529','ocupado-sincobrar':'#dc3545','ocupado-nocobrar':'#fd7e14','reservado':'#0d6efd','reservado-cobrado':'#198754','cobrado-visa':'#ffc107','multiday':'#198754','group':'#9b59b6'};
+var STATES={'libre':{pays:false,porcobrar:false},'ocupado-cobrado':{pays:true,porcobrar:false},'ocupado-sincobrar':{pays:false,porcobrar:true},'ocupado-nocobrar':{pays:false,porcobrar:false},'reservado':{pays:false,porcobrar:true},'reservado-cobrado':{pays:true,porcobrar:false},'cobrado-visa':{pays:true,porcobrar:false},'multiday':{pays:false,porcobrar:false},'group':{pays:false,porcobrar:true}};
+var STATE_CLASS={'libre':'s-libre','ocupado-cobrado':'s-oc','ocupado-sincobrar':'s-os','ocupado-nocobrar':'s-on','reservado':'s-re','reservado-cobrado':'s-rc','cobrado-visa':'s-vi','multiday':'s-multi'};
+var UMB=['#e63946','#f4a261','#2a9d8f','#e9c46a','#a8dadc','#ff6b6b','#c77dff','#06d6a0','#ffd166','#ef476f','#118ab2'];
+var GROUP_BORDER_COLORS=['#00f0ff','#ff007f','#39ff14','#ffff00','#ffa500','#ff4500','#9370db','#ff1493'];
+
+var currentDate=new Date(),selectedHamaca=null,selectedState='libre',data={};
+var groupMode=false,groupSelection=[],groupLDmode=false;
+var mudanzaMode=false,selectedHamacaOrigen=null;
+
+// ---- MODAL MÉTODO DE PAGO ----
+var _payResolve=null;
+function askMethod(desc){
+  return new Promise(function(resolve){
+    _payResolve=resolve;
+    document.getElementById('payMethodDesc').textContent=desc||'¿Cómo ha pagado el cliente?';
+    document.getElementById('payMethodBg').classList.add('open');
+  });
+}
+function resolvePayMethod(val){
+  document.getElementById('payMethodBg').classList.remove('open');
+  if(_payResolve){_payResolve(val);_payResolve=null;}
+}
+
+function getGroupColor(g){if(!g)return null;var key=(g.name||'')+'|'+(g.s||'')+'|'+(g.payDay||'');var h=0;for(var i=0;i<key.length;i++){h=(h*31+key.charCodeAt(i))>>>0;}return GROUP_BORDER_COLORS[h%GROUP_BORDER_COLORS.length];}
+function toggleMenu(open){document.getElementById('dropdownMenu').classList.toggle('open',open);document.getElementById('menuOverlayClose').classList.toggle('open',open);}
+function toggleLegend(open){toggleMenu(false);document.getElementById('legendOverlay').classList.toggle('open',open);}
+
+// ---- ZOOM/PAN ----
+var scale=1,minScale=1,posX=0,posY=0,isPanning=false,initialPinchDistance=0,touchStartX=0,touchStartY=0;
+var BOTTOM_PAD=100,SIDE_PAD=40;
+function updateTransform(){var s=document.getElementById('beachScaler');if(s)s.style.transform='translate('+posX+'px,'+posY+'px) scale('+scale+')';}
+function limitBoundaries(){var outer=document.getElementById('beachOuter'),beach=document.getElementById('beach');if(!outer||!beach)return;var ow=outer.clientWidth,oh=outer.clientHeight,bw=beach.offsetWidth*scale,bh=beach.offsetHeight*scale,usableH=Math.max(0,oh-BOTTOM_PAD);if(bw<=ow){posX=(ow-bw)/2;}else{posX=Math.max(ow-bw-SIDE_PAD,Math.min(SIDE_PAD,posX));}if(bh<=usableH){posY=Math.max(10,(usableH-bh)/2);}else{posY=Math.max(usableH-bh,Math.min(10,posY));}}
+function resetZoom(){var outer=document.getElementById('beachOuter'),beach=document.getElementById('beach');if(!outer||!beach)return;var ow=outer.clientWidth,oh=outer.clientHeight,bw=beach.offsetWidth,bh=beach.offsetHeight;if(!bw||!bh||!ow||!oh){setTimeout(resetZoom,80);return;}minScale=Math.min(ow/bw,(oh-BOTTOM_PAD)/bh,1);scale=minScale;posX=(ow-bw*scale)/2;posY=Math.max(10,(oh-BOTTOM_PAD-bh*scale)/2);updateTransform();}
+function getDistance(t1,t2){var dx=t1.clientX-t2.clientX,dy=t1.clientY-t2.clientY;return Math.sqrt(dx*dx+dy*dy);}
+setTimeout(function(){
+  var outer=document.getElementById('beachOuter');if(!outer)return;
+  outer.addEventListener('touchstart',function(e){if(e.touches.length===1){isPanning=true;touchStartX=e.touches[0].clientX-posX;touchStartY=e.touches[0].clientY-posY;}else if(e.touches.length===2){isPanning=false;initialPinchDistance=getDistance(e.touches[0],e.touches[1]);}},{passive:true});
+  outer.addEventListener('touchmove',function(e){if(isPanning&&e.touches.length===1){posX=e.touches[0].clientX-touchStartX;posY=e.touches[0].clientY-touchStartY;limitBoundaries();updateTransform();}else if(e.touches.length===2){var cd=getDistance(e.touches[0],e.touches[1]);if(initialPinchDistance>0){var midX=(e.touches[0].clientX+e.touches[1].clientX)/2,midY=(e.touches[0].clientY+e.touches[1].clientY)/2,factor=cd/initialPinchDistance,oldScale=scale;scale=Math.max(minScale,Math.min(scale*factor,3.5));if(scale!==oldScale){var rect=outer.getBoundingClientRect(),lx=midX-rect.left,ly=midY-rect.top;posX=lx-(lx-posX)*(scale/oldScale);posY=ly-(ly-posY)*(scale/oldScale);initialPinchDistance=cd;}limitBoundaries();updateTransform();}}},{passive:false});
+  outer.addEventListener('touchend',function(){isPanning=false;initialPinchDistance=0;},{passive:true});
+  outer.addEventListener('dblclick',function(){resetZoom();});
+},300);
+
+// ---- DATA ----
+function dk(d){var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;}
+function load(){try{data=JSON.parse(localStorage.getItem('hamacas_v5')||'{}');}catch(e){data={};}}
+function save(){localStorage.setItem('hamacas_v5',JSON.stringify(data));}
+function dayObj(key){if(!data[key])data[key]={hamacas:{},earned:0,ajuste:0,history:{},cash:0,card:0};var d=data[key];if(!d.hamacas)d.hamacas={};if(d.earned===undefined)d.earned=0;if(d.ajuste===undefined)d.ajuste=0;if(!d.history)d.history={};if(d.cash===undefined)d.cash=d.earned||0;if(d.card===undefined)d.card=0;return d;}
+function addEarn(day,amt,method){day.earned=(day.earned||0)+amt;if(method==='card')day.card=(day.card||0)+amt;else day.cash=(day.cash||0)+amt;}
+function subEarn(day,amt,method){day.earned=Math.max(0,(day.earned||0)-amt);if(method==='card')day.card=Math.max(0,(day.card||0)-amt);else day.cash=Math.max(0,(day.cash||0)-amt);}
+function hId(r,p,s){return r+'-'+p+'-'+s;}
+function mds(){return data.__md||[];}function grps(){return data.__groups||[];}
+function getMultiday(id,dateStr){return mds().find(function(m){return m.hId===id&&dateStr>=m.s&&dateStr<=m.e;})||null;}
+function getGroup(id,dateStr){return grps().find(function(g){return g.hamacas.indexOf(id)!==-1&&dateStr>=g.s&&dateStr<=g.e;})||null;}
+
+function getH(r,p,s){var key=dk(currentDate),id=hId(r,p,s);var md=getMultiday(id,key);if(md)return {state:'multiday',name:md.name,phone:md.phone,multiday:true,mdObj:md};var grp=getGroup(id,key);if(grp){var pf=!!(grp.paid&&grp.paid[id]);return {state:'group',name:grp.name,phone:grp.phone,group:true,grpObj:grp,paidForMe:pf};}return dayObj(key).hamacas[id]||{state:'libre',name:'',phone:''};}
+function getOccCount(id){var key=dk(currentDate),h=dayObj(key).history[id];if(!h)return 0;if(typeof h==='number')return h;if(h===true)return 1;return h.count||1;}
+
+function setH(r,p,s,state,name,phone,method){
+  var key=dk(currentDate),day=dayObj(key),id=hId(r,p,s);
+  var prev=day.hamacas[id]||{state:'libre'};
+  var nowPays=STATES[state]&&STATES[state].pays,wasPays=STATES[prev.state]&&STATES[prev.state].pays;
+  if(nowPays&&!wasPays){addEarn(day,PRICE,method||'cash');}
+  if(state!=='libre'&&(!prev.state||prev.state==='libre')){var h=day.history[id],n=0;if(typeof h==='number')n=h;else if(h===true)n=1;else if(h&&h.count)n=h.count;day.history[id]={count:n+1};}
+  var entry={state:state,name:name,phone:phone};if(nowPays)entry.method=method||prev.method||'cash';
+  day.hamacas[id]=entry;save();
+}
+
+function addDays(dateStr,n){var d=new Date(dateStr+'T12:00:00');d.setDate(d.getDate()+n);return dk(d);}
+function daysBetween(a,b){var da=new Date(a+'T12:00:00'),db=new Date(b+'T12:00:00');return Math.round((db-da)/(1000*60*60*24));}
+
+function addMd(r,p,s,startK,endK,price,name,phone,method){
+  if(!data.__md)data.__md=[];var id=hId(r,p,s);
+  data.__md=data.__md.filter(function(m){return !(m.hId===id&&!(endK<m.s||startK>m.e));});
+  var payKey=dk(currentDate),numDays=daysBetween(startK,endK)+1,finalPrice=price?Number(price):PRICE*numDays;
+  data.__md.push({hId:id,s:startK,e:endK,price:finalPrice,name:name,phone:phone,payDay:payKey,method:method||'cash'});
+  addEarn(dayObj(payKey),finalPrice,method||'cash');save();
+}
+
+function removeMdDay(id,dateStr){if(!data.__md)return;var idx=data.__md.findIndex(function(m){return m.hId===id&&dateStr>=m.s&&dateStr<=m.e;});if(idx===-1)return;var md=Object.assign({},data.__md[idx]);data.__md.splice(idx,1);var prev=addDays(dateStr,-1),next=addDays(dateStr,1);if(prev>=md.s)data.__md.push({hId:md.hId,s:md.s,e:prev,price:md.price,name:md.name,phone:md.phone,payDay:md.payDay,method:md.method});if(next<=md.e)data.__md.push({hId:md.hId,s:next,e:md.e,price:md.price,name:md.name,phone:md.phone,payDay:md.payDay,method:md.method});var pd=dayObj(md.payDay);subEarn(pd,PRICE,md.method||'cash');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;save();}
+function removeMdRest(id,dateStr){if(!data.__md)return;var idx=data.__md.findIndex(function(m){return m.hId===id&&dateStr>=m.s&&dateStr<=m.e;});if(idx===-1)return;var original=Object.assign({},data.__md[idx]);data.__md.splice(idx,1);var prev=addDays(dateStr,-1);if(prev>=original.s)data.__md.push({hId:original.hId,s:original.s,e:prev,price:original.price,name:original.name,phone:original.phone,payDay:original.payDay,method:original.method});var daysCancelled=daysBetween(dateStr,original.e)+1;var pd=dayObj(original.payDay);subEarn(pd,PRICE*daysCancelled,original.method||'cash');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;save();}
+
+// ---- GRUPOS ----
+function saveGroup(){
+  var name=document.getElementById('groupName').value.trim();if(!name){alert('Escribe un nombre');return;}
+  if(groupSelection.length===0){alert('Selecciona al menos una hamaca');return;}
+  var phone=document.getElementById('groupPhone').value.trim(),today=dk(currentDate),startK=today,endK=today;
+  if(groupLDmode){startK=document.getElementById('groupMdStart').value;endK=document.getElementById('groupMdEnd').value;if(!startK||!endK){alert('Rellena las fechas');return;}}
+  var numDays=daysBetween(startK,endK)+1,priceInput=parseFloat(document.getElementById('groupPrice').value);
+  var totalPrice=isNaN(priceInput)||priceInput<=0?groupSelection.length*PRICE*numDays:priceInput;
+  if(!data.__groups)data.__groups=[];
+  data.__groups.push({hamacas:groupSelection.slice(),name:name,phone:phone,s:startK,e:endK,price:totalPrice,payDay:today,paid:{}});
+  save();cancelGroupMode();buildMap();updateSummary();closeGroupModal();
+}
+
+function clonePaid(p){var o={};if(p)Object.keys(p).forEach(function(k){o[k]=p[k];});return o;}
+
+function removeFromGroup(){if(!selectedHamaca)return;var r=selectedHamaca.r,p=selectedHamaca.p,s=selectedHamaca.s,id=hId(r,p,s),key=dk(currentDate);if(!confirm('¿Anular esta hamaca del grupo solo para hoy?'))return;var idx=data.__groups.findIndex(function(g){return g.hamacas.indexOf(id)!==-1&&key>=g.s&&key<=g.e;});if(idx===-1)return;var g=Object.assign({},data.__groups[idx]);data.__groups.splice(idx,1);var prev=addDays(key,-1),wasPaid=!!(g.paid&&g.paid[id]);if(prev>=g.s)data.__groups.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:g.s,e:prev,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});var lasDeHoy=g.hamacas.filter(function(h){return h!==id;});if(lasDeHoy.length>0){var pTo=clonePaid(g.paid);delete pTo[id];data.__groups.push({hamacas:lasDeHoy,name:g.name,phone:g.phone,s:key,e:key,price:g.price,payDay:g.payDay,paid:pTo});}var next=addDays(key,1);if(next<=g.e)data.__groups.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:next,e:g.e,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});if(wasPaid){var wm=(g.paid&&g.paid[id])==='card'?'card':'cash';var pd=dayObj(g.payDay);subEarn(pd,PRICE,wm);if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;}save();buildMap();updateSummary();closeModal();}
+
+function removeFromGroupRest(){if(!selectedHamaca)return;var r=selectedHamaca.r,p=selectedHamaca.p,s=selectedHamaca.s,id=hId(r,p,s),key=dk(currentDate);if(!confirm('¿Anular esta hamaca del grupo desde hoy hasta el final?'))return;var idx=data.__groups.findIndex(function(g){return g.hamacas.indexOf(id)!==-1&&key>=g.s&&key<=g.e;});if(idx===-1)return;var targetGroup=data.__groups[idx],gName=targetGroup.name,gPhone=targetGroup.phone,nuevas=[],refundCash=0,refundCard=0,pd=dayObj(targetGroup.payDay);grps().forEach(function(g){if(g.name!==gName||g.phone!==gPhone||g.e<key){nuevas.push(g);return;}if(g.hamacas.indexOf(id)!==-1){if(key>=g.s&&key<=g.e){var prev=addDays(key,-1);if(prev>=g.s){nuevas.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:g.s,e:prev,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});}var restH=g.hamacas.filter(function(h){return h!==id;});if(restH.length>0){var pTo=clonePaid(g.paid);delete pTo[id];nuevas.push({hamacas:restH,name:g.name,phone:g.phone,s:key,e:g.e,price:g.price,payDay:g.payDay,paid:pTo});}if(g.paid&&g.paid[id]){if(g.paid[id]==='card')refundCard+=PRICE;else refundCash+=PRICE;}}else if(g.s>key){var cleanH=g.hamacas.filter(function(h){return h!==id;});if(cleanH.length>0){var pTo2=clonePaid(g.paid);delete pTo2[id];nuevas.push({hamacas:cleanH,name:g.name,phone:g.phone,s:g.s,e:g.e,price:g.price,payDay:g.payDay,paid:pTo2});}if(g.paid&&g.paid[id]){if(g.paid[id]==='card')refundCard+=PRICE;else refundCash+=PRICE;}}}else{nuevas.push(g);}});data.__groups=nuevas;if(refundCash>0)subEarn(pd,refundCash,'cash');if(refundCard>0)subEarn(pd,refundCard,'card');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;save();buildMap();updateSummary();closeModal();}
+
+function deleteWholeGroup(){if(!selectedHamaca)return;var r=selectedHamaca.r,p=selectedHamaca.p,s=selectedHamaca.s,id=hId(r,p,s),key=dk(currentDate);var grp=getGroup(id,key);if(!grp)return;if(!confirm('¿Eliminar por completo el grupo desde hoy?'))return;var gName=grp.name,gPhone=grp.phone,nuevas=[],refundCash=0,refundCard=0,pd=dayObj(grp.payDay);function addRefund(p){if(!p)return;Object.keys(p).forEach(function(k){if(p[k]==='card')refundCard+=PRICE;else refundCash+=PRICE;});}grps().forEach(function(g){if(g.name!==gName||g.phone!==gPhone||g.e<key){nuevas.push(g);return;}if(key>=g.s&&key<=g.e){var prev=addDays(key,-1);if(prev>=g.s){nuevas.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:g.s,e:prev,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});}addRefund(g.paid);}else if(g.s>key){addRefund(g.paid);}});data.__groups=nuevas;if(refundCash>0)subEarn(pd,refundCash,'cash');if(refundCard>0)subEarn(pd,refundCard,'card');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;save();buildMap();updateSummary();closeModal();}
+
+function toggleGroupHamacaPaid(){
+  if(!selectedHamaca)return;
+  var r=selectedHamaca.r,p=selectedHamaca.p,s=selectedHamaca.s,id=hId(r,p,s),key=dk(currentDate);
+  var grp=getGroup(id,key);if(!grp)return;if(!grp.paid)grp.paid={};var pd=dayObj(key);
+  if(grp.paid[id]){var m=grp.paid[id]==='card'?'card':'cash';delete grp.paid[id];subEarn(pd,PRICE,m);if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;save();buildMap();updateSummary();closeModal();}
+  else{
+    askMethod('¿Cómo ha pagado esta hamaca?').then(function(method){
+      if(!method)return;
+      grp.paid[id]=method;addEarn(pd,PRICE,method);save();buildMap();updateSummary();closeModal();
+    });
+  }
+}
+
+function payWholeGroup(){
+  if(!selectedHamaca)return;
+  var r=selectedHamaca.r,p=selectedHamaca.p,s=selectedHamaca.s,id=hId(r,p,s),key=dk(currentDate);
+  var grp=getGroup(id,key);if(!grp)return;if(!grp.paid)grp.paid={};
+  var pendientes=grp.hamacas.filter(function(hid){return !grp.paid[hid];});
+  if(pendientes.length===0){alert('Todas las hamacas ya están cobradas.');return;}
+  if(!confirm('¿Cobrar '+pendientes.length+' hamaca(s) por '+(pendientes.length*PRICE)+'€?'))return;
+  askMethod('¿Cómo ha pagado el grupo?').then(function(method){
+    if(!method)return;
+    var pd=dayObj(key);pendientes.forEach(function(hid){grp.paid[hid]=method;});addEarn(pd,pendientes.length*PRICE,method);save();buildMap();updateSummary();closeModal();
+  });
+}
+
+function startGroupMode(){groupMode=true;groupSelection=[];document.getElementById('groupBar').classList.add('active');document.getElementById('fabGroup').style.display='none';buildMap();}
+function cancelGroupMode(){groupMode=false;groupSelection=[];document.getElementById('groupBar').classList.remove('active');document.getElementById('fabGroup').style.display='flex';buildMap();}
+function confirmGroupSelection(){if(groupSelection.length===0){alert('Selecciona al menos una hamaca');return;}document.getElementById('groupCount').textContent=groupSelection.length;document.getElementById('groupName').value='';document.getElementById('groupPhone').value='';document.getElementById('groupPrice').value='';var today=dk(currentDate);document.getElementById('groupMdStart').value=today;document.getElementById('groupMdEnd').value=today;toggleGroupLD(false);document.getElementById('groupModalBg').classList.add('open');}
+function closeGroupModal(){document.getElementById('groupModalBg').classList.remove('open');cancelGroupMode();}
+function toggleGroupLD(val){groupLDmode=val;document.getElementById('groupLDfields').style.display=val?'block':'none';document.getElementById('gbLDyes').className=val?'active':'';document.getElementById('gbLDno').className=val?'':'active';}
+function toggleHamacaSelection(id){var idx=groupSelection.indexOf(id);if(idx===-1)groupSelection.push(id);else groupSelection.splice(idx,1);document.getElementById('groupBarLabel').textContent='👥 '+groupSelection.length+' selecc.';buildMap();}
+
+// ---- SVG ----
+function shade(hex,pct){var n=parseInt(hex.replace('#',''),16)||0,r=(n>>16)+pct,g=((n>>8)&0xff)+pct,b=(n&0xff)+pct;return '#'+[r,g,b].map(function(x){return Math.max(0,Math.min(255,x)).toString(16).padStart(2,'0');}).join('');}
+function umbSVG(c){var s=shade(c,-25);return '<svg width="24" height="22" viewBox="0 0 30 28" xmlns="http://www.w3.org/2000/svg" style="display:block"><line x1="15" y1="7" x2="17" y2="27" stroke="#8B6914" stroke-width="1.8" stroke-linecap="round"/><path d="M2,12 Q15,1 28,12 Z" fill="'+c+'"/><path d="M2,12 Q8.5,6.5 15,7 L15,12 Q8.5,9 2,12 Z" fill="'+s+'" opacity="0.5"/><path d="M15,7 Q21.5,6.5 28,12 L15,12 Z" fill="'+s+'" opacity="0.25"/></svg>';}
+function hamSVG(color,isMulti,isGroup){var extra=isMulti?'<text x="19" y="21" text-anchor="middle" font-size="9" fill="white" font-weight="bold">∞</text>':isGroup?'<text x="19" y="21" text-anchor="middle" font-size="9" fill="white" font-weight="bold">G</text>':'';return '<svg viewBox="0 0 38 34" xmlns="http://www.w3.org/2000/svg" class="hamaca-svg"><ellipse cx="19" cy="33" rx="12" ry="2" fill="rgba(0,0,0,0.1)"/><line x1="9" y1="24" x2="6" y2="32" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/><line x1="29" y1="24" x2="32" y2="32" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="8" y2="26" stroke="#8B6914" stroke-width="1.8" stroke-linecap="round"/><line x1="32" y1="6" x2="30" y2="26" stroke="#8B6914" stroke-width="1.8" stroke-linecap="round"/><path d="M8,11 Q19,7 30,11 L28,25 Q19,28 10,25 Z" fill="'+color+'"/>'+extra+'</svg>';}
+
+function makeH(r,p,s){var h=getH(r,p,s),isMulti=!!h.multiday,isGroup=!!h.group,id=hId(r,p,s);var paidInGroup=isGroup&&h.paidForMe;var color=isMulti?'#198754':isGroup?(paidInGroup?'#212529':'#9b59b6'):(COLORS[h.state]||COLORS.libre);var wrap=document.createElement('div');wrap.className='hamaca-wrap';if(isGroup&&h.grpObj){var gc=getGroupColor(h.grpObj);if(gc)wrap.style.boxShadow='0 0 0 3px '+gc;}if(groupMode){if(groupSelection.indexOf(id)!==-1)wrap.classList.add('selected-group');wrap.onclick=function(){toggleHamacaSelection(id);};}else if(mudanzaMode){wrap.onclick=function(){handleMudanzaClick(r,p,s);};}else{wrap.onclick=function(){openModal(r,p,s);};}wrap.innerHTML=hamSVG(color,isMulti,isGroup);if(isGroup&&h.grpObj){var badge=document.createElement('div');badge.className='group-badge'+(paidInGroup?' paid':'');badge.textContent=h.grpObj.name.slice(0,12);wrap.appendChild(badge);}var occ=getOccCount(id);if(occ>1&&h.state!=='libre'){var rb=document.createElement('div');rb.className='reocc-badge';rb.textContent=occ;wrap.appendChild(rb);}var lbl=document.createElement('div');lbl.className='hamaca-name';lbl.textContent=(!isGroup&&h.name)?h.name.slice(0,7):'';wrap.appendChild(lbl);return wrap;}
+function stonePath(){var div=document.createElement('div');div.className='stone-path';for(var i=0;i<4;i++){var s=document.createElement('div');s.className='stone';div.appendChild(s);}return div;}
+function makePair(r,p){var div=document.createElement('div');div.className='pair';var uw=document.createElement('div');uw.innerHTML=umbSVG(UMB[(p-1)%UMB.length]);var beds=document.createElement('div');beds.className='pair-beds';beds.appendChild(makeH(r,p,'L'));beds.appendChild(makeH(r,p,'R'));div.appendChild(uw);div.appendChild(beds);return div;}
+function buildMap(){var map=document.getElementById('beachMap');map.innerHTML='';for(var r=1;r<=ROWS;r++){var row=document.createElement('div');row.className='row';var rn=document.createElement('div');rn.className='row-num';rn.textContent=r;row.appendChild(rn);var b1=document.createElement('div');b1.className='block';for(var p=1;p<=BLOCK1;p++)b1.appendChild(makePair(r,p));row.appendChild(b1);row.appendChild(stonePath());var b2=document.createElement('div');b2.className='block';for(var p2=BLOCK1+1;p2<=TOTAL_PAIRS;p2++)b2.appendChild(makePair(r,p2));row.appendChild(b2);map.appendChild(row);}}
+
+function updateSummary(){var key=dk(currentDate),ocupadas=0,libres=0,porcobrar=0;for(var r=1;r<=ROWS;r++)for(var p=1;p<=TOTAL_PAIRS;p++)['L','R'].forEach(function(s){var h=getH(r,p,s);if(h.state==='libre'){libres++;return;}ocupadas++;if(h.state==='group'){if(!h.paidForMe)porcobrar+=PRICE;}else if(STATES[h.state]&&STATES[h.state].porcobrar)porcobrar+=PRICE;});document.getElementById('s-ocupadas').textContent=ocupadas;document.getElementById('s-libres').textContent=libres;document.getElementById('s-porcobrar').textContent=porcobrar+'€';document.getElementById('s-total').textContent=dayTotal(key)+'€';}
+
+function updateResumen(){var y=currentDate.getFullYear(),m=currentDate.getMonth();var thisM=calcKeys(monthKeys(y,m)),pd=new Date(y,m-1,1),prevM=calcKeys(monthKeys(pd.getFullYear(),pd.getMonth()));var week=calcKeys(weekKeys()),day=dayTotal(dk(currentDate));document.getElementById('r-dia').textContent=day+'€';document.getElementById('r-sem').textContent=week+'€';document.getElementById('r-mes').textContent=thisM+'€';document.getElementById('r-mesnum').textContent=thisM+'€';document.getElementById('r-mesprev').textContent=prevM+'€';var dKey=dk(currentDate),dObj=data[dKey]||{};var ajuste=dObj.ajuste||0;var rawCash=dObj.cash||0,rawCard=dObj.card||0;if(!dObj.cash&&!dObj.card&&dObj.earned){rawCash=dObj.earned;}var cashShown=Math.max(0,rawCash-ajuste),cardShown=rawCard;document.getElementById('r-cash').textContent=cashShown+'€';document.getElementById('r-card').textContent=cardShown+'€';document.getElementById('r-totaldia').textContent=(cashShown+cardShown)+'€';document.getElementById('r-bar').style.width=(thisM/Math.max(thisM,prevM,1)*100)+'%';var diff=thisM-prevM,cmp=document.getElementById('r-compare');cmp.className='compare '+(diff>0?'pos':diff<0?'neg':'');cmp.textContent=diff>0?'▲ '+diff+'€ más':'▼ '+Math.abs(diff)+'€ menos';var counts={};monthKeys(y,m).forEach(function(k){var dd=data[k]||{};Object.entries(dd.hamacas||{}).forEach(function(e){if(e[1].state&&e[1].state!=='libre'){counts[e[0]]=(counts[e[0]]||0)+1;}});Object.keys(dd.history||{}).forEach(function(id){if(!dd.hamacas[id]||dd.hamacas[id].state==='libre'){counts[id]=(counts[id]||0)+1;}});});mds().forEach(function(md){counts[md.hId]=(counts[md.hId]||0)+(daysBetween(md.s,md.e)+1);});grps().forEach(function(g){var d=daysBetween(g.s,g.e)+1;g.hamacas.forEach(function(id){counts[id]=(counts[id]||0)+d;});});var sorted=Object.entries(counts).sort(function(a,b){return b[1]-a[1];}).slice(0,5);var top=document.getElementById('r-tophamacas');if(!sorted.length){top.textContent='Sin datos';return;}top.innerHTML=sorted.map(function(e){var pts=e[0].split('-'),pn=parseInt(pts[1])<=BLOCK1?pts[1]:parseInt(pts[1])-BLOCK1;return '<div>Fila '+pts[0]+'·P'+pn+'·'+pts[2]+' — <strong>'+e[1]+' días</strong></div>';}).join('');}
+
+function openAjuste(){document.getElementById('ajusteInput').value='';document.getElementById('ajusteBg').classList.add('open');}
+function closeAjuste(){document.getElementById('ajusteBg').classList.remove('open');}
+function applyAjusteCustom(){var v=parseFloat(document.getElementById('ajusteInput').value);if(v>0){var day=dayObj(dk(currentDate));day.ajuste=Math.min(day.earned,(day.ajuste||0)+v);save();updateSummary();closeAjuste();}}
+function resetAjuste(){dayObj(dk(currentDate)).ajuste=0;save();updateSummary();closeAjuste();}
+
+function dayTotal(key){var day=data[key];return day?Math.max(0,(day.earned||0)-(day.ajuste||0)):0;}
+function calcKeys(keys){return keys.reduce(function(a,k){return a+dayTotal(k);},0);}
+function monthKeys(y,m){return Object.keys(data).filter(function(k){return k!=='__md'&&k!=='__groups'&&k.startsWith(y+'-'+String(m+1).padStart(2,'0'));});}
+function weekKeys(){var ks=[],d=new Date(currentDate),day=d.getDay()||7;d.setDate(d.getDate()-day+1);for(var i=0;i<7;i++){ks.push(dk(d));d.setDate(d.getDate()+1);}return ks;}
+
+function formatDate(d){var days=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return days[d.getDay()]+' '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();}
+function changeDate(n){currentDate=new Date(currentDate);currentDate.setDate(currentDate.getDate()+n);renderAll();}
+function goToday(){currentDate=new Date();renderAll();}
+
+function openModal(r,p,s){
+  if(groupMode)return;if(mudanzaMode){handleMudanzaClick(r,p,s);return;}
+  selectedHamaca={r:r,p:p,s:s};var h=getH(r,p,s),isM=!!h.multiday,isG=!!h.group;selectedState=isM||isG?'libre':h.state;
+  var pn=p<=BLOCK1?p:p-BLOCK1;document.getElementById('modalTitle').textContent='Fila '+r+' · Pos '+pn+' · '+(s==='L'?'Izquierda':'Derecha');
+  var bmd=document.getElementById('infoBannerMd'),bgrp=document.getElementById('infoBannerGrp');
+  ['btnCancelDay','btnCancelRest','btnRemoveFromGroup','btnRemoveFromGroupRest','btnDeleteGroup','btnPayGroupHamaca','btnPayWholeGroup','btnMoveHamaca'].forEach(function(id){document.getElementById(id).style.display='none';});
+  if(isM&&h.mdObj){bmd.style.display='block';bgrp.style.display='none';bmd.innerHTML='<strong>📅 Reserva larga activa</strong>Del '+h.mdObj.s+' al '+h.mdObj.e+'<br>'+h.mdObj.price+'€';document.getElementById('btnCancelDay').style.display='block';document.getElementById('btnCancelRest').style.display='block';}
+  else if(isG&&h.grpObj){bgrp.style.display='block';bmd.style.display='none';var paidCount=h.grpObj.paid?Object.keys(h.grpObj.paid).length:0;var estadoCobro=h.paidForMe?'<br><strong style="color:#198754">✓ Esta hamaca COBRADA</strong>':'<br><strong style="color:#dc3545">⏳ Pendiente de cobro</strong>';bgrp.innerHTML='<strong>👥 Grupo: '+h.grpObj.name+'</strong>'+h.grpObj.hamacas.length+' hamacas · Cobradas: '+paidCount+'/'+h.grpObj.hamacas.length+estadoCobro;var btnPay=document.getElementById('btnPayGroupHamaca');btnPay.style.display='block';btnPay.textContent=h.paidForMe?'↩️ Desmarcar cobro de esta hamaca':'💰 Cobrar esta hamaca ('+PRICE+'€)';var pendientes=h.grpObj.hamacas.length-paidCount;if(pendientes>0){var btnAll=document.getElementById('btnPayWholeGroup');btnAll.style.display='block';btnAll.textContent='💰 Cobrar Grupo Entero ('+(pendientes*PRICE)+'€)';}document.getElementById('btnRemoveFromGroup').style.display='block';document.getElementById('btnRemoveFromGroupRest').style.display='block';document.getElementById('btnDeleteGroup').style.display='block';}
+  else{bmd.style.display='none';bgrp.style.display='none';}
+  if(h.state!=='libre'||isM||isG){document.getElementById('btnMoveHamaca').style.display='block';}
+  document.getElementById('nameInput').value=(isM||isG)?'':(h.name||'');document.getElementById('phoneInput').value=(isM||isG)?'':(h.phone||'');
+  var today=dk(currentDate);document.getElementById('mdStart').value=today;document.getElementById('mdEnd').value=today;document.getElementById('mdPrice').value='';document.getElementById('mdName').value='';document.getElementById('mdPhone').value='';
+  selectStateUI(selectedState);document.getElementById('modalBg').classList.add('open');
+}
+
+function selectStateUI(s){selectedState=s;document.getElementById('multidaySection').classList.toggle('visible',s==='multiday');document.getElementById('normalFields').style.display=s==='multiday'?'none':'block';document.querySelectorAll('.state-btn').forEach(function(b){b.classList.remove('selected');if(STATE_CLASS[s]&&b.classList.contains(STATE_CLASS[s]))b.classList.add('selected');});}
+function selectState(s,e){selectStateUI(s);}
+function closeModal(){document.getElementById('modalBg').classList.remove('open');selectedHamaca=null;}
+function cancelMdDay(){removeMdDay(hId(selectedHamaca.r,selectedHamaca.p,selectedHamaca.s),dk(currentDate));buildMap();updateSummary();closeModal();}
+function cancelMdRest(){removeMdRest(hId(selectedHamaca.r,selectedHamaca.p,selectedHamaca.s),dk(currentDate));buildMap();updateSummary();closeModal();}
+
+function saveHamaca(){
+  if(!selectedHamaca)return;var r=selectedHamaca.r,p=selectedHamaca.p,s=selectedHamaca.s;
+  var key=dk(currentDate),id=hId(r,p,s);
+  var hasMd=getMultiday(id,key),hasGrp=getGroup(id,key);
+  if((hasMd||hasGrp)&&selectedState!=='multiday'){if(!confirm('⚠️ Esta hamaca tiene una reserva activa. ¿Seguro?')){closeModal();return;}}
+  if(selectedState==='multiday'){
+    var start=document.getElementById('mdStart').value,end=document.getElementById('mdEnd').value;
+    var price=document.getElementById('mdPrice').value,name=document.getElementById('mdName').value.trim(),phone=document.getElementById('mdPhone').value.trim();
+    if(!start||!end){alert('Rellena las fechas.');return;}
+    // Solo para multiday preguntamos método
+    askMethod('¿Cómo ha pagado la reserva?').then(function(method){
+      if(!method)return;
+      addMd(r,p,s,start,end,price,name,phone,method);buildMap();updateSummary();closeModal();
+    });
+    return;
+  }
+  var nm=document.getElementById('nameInput').value.trim(),ph=document.getElementById('phoneInput').value.trim();
+  var md=getMultiday(id,key);if(md){data.__md=(data.__md||[]).filter(function(m){return m!==md;});save();}
+  var grp=getGroup(id,key);
+  if(grp){var idx=data.__groups.indexOf(grp);if(idx!==-1){var g=Object.assign({},data.__groups[idx]);data.__groups.splice(idx,1);var prev=addDays(key,-1);var wasPaidMethod=(g.paid&&g.paid[id])||null;if(prev>=g.s)data.__groups.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:g.s,e:prev,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});var lasDeHoy=g.hamacas.filter(function(h){return h!==id;});if(lasDeHoy.length>0){var pTo=clonePaid(g.paid);delete pTo[id];data.__groups.push({hamacas:lasDeHoy,name:g.name,phone:g.phone,s:key,e:key,price:g.price,payDay:g.payDay,paid:pTo});}var next=addDays(key,1);if(next<=g.e)data.__groups.push({hamacas:g.hamacas.slice(),name:g.name,phone:g.phone,s:next,e:g.e,price:g.price,payDay:g.payDay,paid:clonePaid(g.paid)});if(wasPaidMethod){var pd=dayObj(g.payDay);subEarn(pd,PRICE,wasPaidMethod==='card'?'card':'cash');if(pd.ajuste>pd.earned)pd.ajuste=pd.earned;}save();}}
+
+  // Determinar método según el estado elegido
+  var prevSt=(dayObj(key).hamacas[id]||{}).state||'libre';
+  var willPay=STATES[selectedState]&&STATES[selectedState].pays,wasPay=STATES[prevSt]&&STATES[prevSt].pays;
+  if(willPay&&!wasPay){
+    // ocupado-cobrado → efectivo directo; cobrado-visa → tarjeta directa; reservado-cobrado → preguntar
+    if(selectedState==='cobrado-visa'){setH(r,p,s,selectedState,nm,ph,'card');buildMap();updateSummary();closeModal();}
+    else if(selectedState==='ocupado-cobrado'){setH(r,p,s,selectedState,nm,ph,'cash');buildMap();updateSummary();closeModal();}
+    else{
+      askMethod('¿Cómo ha pagado el cliente?').then(function(method){
+        if(!method)return;
+        setH(r,p,s,selectedState,nm,ph,method);buildMap();updateSummary();closeModal();
+      });
+    }
+    return;
+  }
+  setH(r,p,s,selectedState,nm,ph,null);buildMap();updateSummary();closeModal();
+}
+
+function startMudanza(){if(!selectedHamaca)return;selectedHamacaOrigen={r:selectedHamaca.r,p:selectedHamaca.p,s:selectedHamaca.s};mudanzaMode=true;closeModal();document.getElementById('mudanzaBar').classList.add('active');buildMap();}
+function cancelMudanza(){mudanzaMode=false;selectedHamacaOrigen=null;document.getElementById('mudanzaBar').classList.remove('active');buildMap();}
+function handleMudanzaClick(r,p,s){if(!mudanzaMode||!selectedHamacaOrigen)return;var o=selectedHamacaOrigen;if(r===o.r&&p===o.p&&s===o.s){alert('Es la misma hamaca.');return;}var destH=getH(r,p,s);if(destH.state!=='libre'){alert('La hamaca destino debe estar libre');return;}var key=dk(currentDate),originId=hId(o.r,o.p,o.s),destId=hId(r,p,s),day=dayObj(key);var md=getMultiday(originId,key);if(md){(data.__md||[]).forEach(function(m){if(m===md)m.hId=destId;});save();cancelMudanza();updateSummary();return;}var grp=getGroup(originId,key);if(grp){var idx=grp.hamacas.indexOf(originId);if(idx!==-1){grp.hamacas.splice(idx,1,destId);}if(grp.paid&&grp.paid[originId]){grp.paid[destId]=true;delete grp.paid[originId];}save();cancelMudanza();buildMap();updateSummary();return;}var orig=day.hamacas[originId];if(orig){day.hamacas[destId]={state:orig.state,name:orig.name||'',phone:orig.phone||''};delete day.hamacas[originId];if(day.history&&day.history[originId]){day.history[destId]=day.history[originId];delete day.history[originId];}save();}cancelMudanza();updateSummary();}
+
+function exportDay(){var key=dk(currentDate),day=data[key],total=dayTotal(key);var txt='RESUMEN '+formatDate(currentDate)+'\nTOTAL: '+total+'€';var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='hamacas_'+key+'.txt';a.click();}
+
+function showScreen(s){toggleMenu(false);if(s==='mapa'){document.getElementById('mainView').classList.add('active');document.getElementById('resumenScreen').classList.remove('active');setTimeout(resetZoom,50);}else{document.getElementById('mainView').classList.remove('active');document.getElementById('resumenScreen').classList.add('active');updateResumen();}}
+function renderAll(){document.getElementById('dateLabel').textContent=formatDate(currentDate);buildMap();updateSummary();setTimeout(resetZoom,60);}
+
+load();renderAll();
+window.addEventListener('resize',resetZoom);
+</script>
+</body>
+</html>
